@@ -1,3 +1,13 @@
+libpgjava (7.4.7-1) unstable; urgency=medium
+
+  * New upstream release (closes: #275154)
+    Changelog mentions jdbc fixes in 7.4.3 and 7.4.4 release
+  * Changed debian/rules to only build once to prevent false compilation
+    of jdbc2 driver with jdbc3 classes (closes: #302710)
+  * avdyk: added Wolfgang and myself to the uploaders
+  
+ -- Wolfgang Baer <WBaer@gmx.de>  Sat, 2 Apr 2005 18:14:29 +0200
+
 libpgjava (7.4.2-1) unstable; urgency=low
 
   * New upstream release (closes: #242448)

@@ -2,8 +2,8 @@ Source: libpgjava
 Section: contrib/libs
 Priority: optional
 Maintainer: Debian Java Maintainers <pkg-java-maintainers@lists.alioth.debian.org>
-Uploaders: Stefan Gybas <sgybas@debian.org>
-Build-Depends: cdbs (>= 0.4.8), debhelper (>= 4.1.0), j2sdk1.3, j2sdk1.4, libant1.6-java, libxerces2-java
+Uploaders: Stefan Gybas <sgybas@debian.org>, Arnaud Vandyck <avdyk@debian.org>, Wolfgang Baer <WBaer@gmx.de>
+Build-Depends-Indep: cdbs (>= 0.4.8), debhelper (>= 4.1.0), j2sdk1.3, j2sdk1.4, libant1.6-java, libxerces2-java
 Standards-Version: 3.6.1
 
 Package: libpgjava
