@@ -1,6 +1,18 @@
+libpgjava (7.4.2-1) unstable; urgency=low
+
+  * New upstream release (closes: #242448)
+  * Apply patch from Adam Heath to fix NullPointerException in
+    org.postgresql.jdbc1.AbstractJdbc1DatabaseMetaData.getIndexInfo()
+    (closes: #238961)
+  * Updated debian/copyright
+  * Use libant1.6-java instead of libant1.5-java for building
+  * 
+
+ -- Stefan Gybas <sgybas@debian.org>  Mon, 19 Apr 2004 19:40:03 +0200
+
 libpgjava (7.4-1) unstable; urgency=low
 
-  * New upstream release (extracted from the source of PostgreSQL 7.3)
+  * New upstream release (extracted from the source of PostgreSQL 7.4)
     + Fixes extraction of column width and decimal digits for numeric and
       decimal column types in AbstractJdbc1DatabaseMetaData (closes: #188510)
     + Fixes setting of FK_NAME in AbstractJdbc1DatabaseMetaData

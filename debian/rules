@@ -2,11 +2,12 @@
 # debian/rules file for libpgjava (uses cdbs)
 
 include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/rules/simple-patchsys.mk
 
 # Build using Blackdown's JDK 1.3 and 1.4 Debian packages
 JAVA13_HOME := /usr/lib/j2se/1.3
 JAVA14_HOME := /usr/lib/j2se/1.4
-ANT_HOME    := /usr/share/ant1.5
+ANT_HOME    := /usr/share/ant1.6
 
 UPSTREAM_VERSION := $(shell head -1 debian/changelog | cut -f2 -d\( | cut -f1 -d\) | cut -f1 -d\-)
 majorversion := $(shell echo $(UPSTREAM_VERSION) | sed 's/^\([0-9][0-9]*\)\..*$$/\1/')
@@ -15,13 +16,13 @@ minorversion := $(shell echo $(UPSTREAM_VERSION) | sed 's/^[0-9][0-9]*\.\([0-9][
 
 clean::
 	rm -f postgresql-jdbc*.jar
-	-cd src/interfaces/jdbc && sh -c "CLASSPATH=$(ANT_HOME)/lib/ant.jar \
+	-cd src/interfaces/jdbc && sh -c "CLASSPATH=$(ANT_HOME)/lib/ant.jar:$(ANT_HOME)/lib/ant-launcher.jar:/usr/share/java/xmlParserAPIs.jar:/usr/share/java/xercesImpl.jar \
 		$(JAVA13_HOME)/bin/java -Dant.home=$(ANT_HOME) \
 		org.apache.tools.ant.Main clean"
 
 
 build/libpgjava::
-	cd src/interfaces/jdbc && sh -c "CLASSPATH=$(ANT_HOME)/lib/ant.jar:$(JAVA13_HOME)/lib/tools.jar \
+	cd src/interfaces/jdbc && sh -c "CLASSPATH=$(ANT_HOME)/lib/ant.jar:$(ANT_HOME)/lib/ant-launcher.jar:/usr/share/java/xmlParserAPIs.jar:/usr/share/java/xercesImpl.jar:$(JAVA13_HOME)/lib/tools.jar \
 		$(JAVA13_HOME)/bin/java -Dant.home=$(ANT_HOME) \
 		org.apache.tools.ant.Main jar \
 		-Dmajor=$(majorversion) -Dminor=$(minorversion) \
@@ -31,7 +32,7 @@ build/libpgjava::
 	rm src/interfaces/jdbc/org/postgresql/Driver.java
 	rm -rf src/interfaces/jdbc/build src/interfaces/jdbc/jars
 
-	cd src/interfaces/jdbc && sh -c "CLASSPATH=$(ANT_HOME)/lib/ant.jar:$(JAVA14_HOME)/lib/tools.jar:$(JAVA14_HOME)/jre/lib/jsse.jar \
+	cd src/interfaces/jdbc && sh -c "CLASSPATH=$(ANT_HOME)/lib/ant.jar:$(ANT_HOME)/lib/ant-launcher.jar:$(JAVA14_HOME)/lib/tools.jar:$(JAVA14_HOME)/jre/lib/jsse.jar \
 		$(JAVA14_HOME)/bin/java -Dant.home=$(ANT_HOME) \
 		org.apache.tools.ant.Main jar \
 		-Dmajor=$(majorversion) -Dminor=$(minorversion) \
