@@ -1,7 +1,29 @@
+libpgjava (7.4-1) unstable; urgency=low
+
+  * New upstream release (extracted from the source of PostgreSQL 7.3)
+    + Fixes extraction of column width and decimal digits for numeric and
+      decimal column types in AbstractJdbc1DatabaseMetaData (closes: #188510)
+    + Fixes setting of FK_NAME in AbstractJdbc1DatabaseMetaData
+      (closes: #197825)
+  * Set Maintainer: to Debian Java Maintainers and added myself to uploaders
+  * Switch debian/rules to CDBS, but not using the Ant class
+  * Use the new libant1.5-java for building instead of calling the
+    /usr/bin/ant script
+  * Use the JDK 1.4 package from Blackdown for building and enable SSL support
+    for the JDBC3 driver
+  * Make the directory layout for the examples match the package name
+    (closes: #205057)
+  * Updated the long description
+  * Fix a spelling error in the previous changelog entry
+  * Standards-Version: 3.6.1
+    + Moved Build-Depends-Indep to Build-Depends
+
+ -- Stefan Gybas <sgybas@debian.org>  Tue, 18 Nov 2003 23:35:23 +0100
+
 libpgjava (7.3-1) unstable; urgency=low
 
   * New upstream release (extracted from the source of PostgreSQL 7.3)
-  * Build a JDBC2 and a JDBC3 (with DataSource) version in serperate JARs
+  * Build a JDBC2 and a JDBC3 (with DataSource) version in serparate JARs
     and mention this in the long package description
   * Build with debhelper >= 4.1.0 to get rid of /usr/doc compatibility
     symlinks
