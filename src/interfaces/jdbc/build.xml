@@ -1,8 +1,10 @@
 <?xml version="1.0"?>
 <!--
 
-  build file to allow ant (http://jakarta.apache.org/ant/) to be used
-  to build the PostgreSQL JDBC Driver
+  Build file to allow ant (http://jakarta.apache.org/ant/) to be used
+  to build the PostgreSQL JDBC Driver.
+
+  This file now requires Ant 1.4.1.  2002-04-18
 
   $Header$
 
@@ -19,9 +21,9 @@
   <property name="jardir"  value="jars" />
   <property name="builddir" value="build" />
   <property name="package" value="org/postgresql" />
-
+  <property name="debug" value="on" />
   <property name="optimize" value="true"/>
-  <property name="debug" value="on"/>
+  <property name="build.compiler" value="jikes"/>
 
   <!--
     This is a simpler method than utils.CheckVersion
@@ -29,12 +31,42 @@
     in the CLASSPATH (ie JDK1.2 or later), and then enterprise if the
     javax.sql.DataSource class is present.
 
-    Important: This must have the following order: jdbc1, jdbc2, enterprise
+    Important: This must have the following order: jdbc1, jdbc2, jdbc3
   -->
   <target name="check_versions">
-    <available property="jdk1.2+" classname="java.lang.ThreadLocal" />
-    <available property="jdk1.2e+" classname="javax.sql.DataSource" />
+    <condition property="jdbc1">
+      <equals arg1="${ant.java.version}" arg2="1.1"/>
+    </condition>
+    <condition property="jdbc2">
+      <or>
+        <equals arg1="${ant.java.version}" arg2="1.2"/>
+        <equals arg1="${ant.java.version}" arg2="1.3"/>
+      </or>
+    </condition>
+    <condition property="jdbc3">
+        <equals arg1="${ant.java.version}" arg2="1.4"/>
+    </condition>
+    <available property="datasource" classname="javax.sql.DataSource"/>
     <available property="junit" classname="junit.framework.Test" />
+    <condition property="jdbc2tests">
+      <and>
+        <isset property="jdbc2"/>
+        <isset property="junit"/>
+      </and>
+    </condition>
+    <condition property="jdbc2optionaltests">
+      <and>
+        <isset property="jdbc2"/>
+        <isset property="datasource"/>
+        <isset property="junit"/>
+      </and>
+    </condition>
+    <condition property="jdbc3tests">
+      <and>
+        <isset property="jdbc3"/>
+        <isset property="junit"/>
+      </and>
+    </condition>
   </target>
 
 
@@ -70,20 +102,18 @@
 
 
   <!-- This is the core of the driver.  It is common for all three versions. -->
-  <target name="compile" depends="prepare,check_versions,driver">
-    <javac srcdir="${srcdir}" destdir="${builddir}">
+  <target name="compile" depends="prepare,driver">
+    <javac srcdir="${srcdir}" destdir="${builddir}" debug="${debug}">
       <include name="${package}/**" />
 
-      <exclude name="${package}/jdbc1/**" if="jdk1.2+" />
-      <exclude name="${package}/jdbc2/**" unless="jdk1.2+" />
+      <exclude name="${package}/jdbc1/**" unless="jdbc1"/>
+      <exclude name="${package}/jdbc2/**" unless="jdbc2"/>
+      <exclude name="${package}/jdbc3/**" unless="jdbc3"/>
 
-      <exclude name="${package}/largeobject/PGblob.java" unless="jdk1.2+" />
-      <exclude name="${package}/largeobject/PGclob.java" unless="jdk1.2+" />
+      <exclude name="${package}/jdbc2/optional/**" unless="jdbc2" />
+      <exclude name="${package}/jdbc2/optional/**" unless="datasource" />
 
-      <exclude name="${package}/PostgresqlDataSource.java" unless="jdk1.2e+" />
-      <exclude name="${package}/xa/**" unless="jdk1.2e+" />
-
-      <exclude name="${package}/test/**" unless="junit" />
+      <exclude name="${package}/test/**"/>
     </javac>
   </target>
 
@@ -92,16 +122,34 @@
     This generates Driver.java from Driver.java.in
     It's required for importing the driver version properties
   -->
-  <target name="driver" depends="prepare,check_versions">
+  <target name="driver" depends="prepare">
     <!-- determine the edition text -->
-    <property name="edition" value="JDBC1" />
-    <available property="edition" value="JDBC2" classname="java.lang.ThreadLocal" />
-    <available property="edition" value="JDBC2" classname="java.lang.StrictMath" />
-    <available property="edition" value="JDBC2 Enterprise" classname="javax.sql.DataSource" />
+    <condition property="edition" value="JDBC1">
+        <equals arg1="${jdbc1}" arg2="true"/>
+    </condition>
+    <condition property="edition" value="JDBC2">
+        <equals arg1="${jdbc2}" arg2="true"/>
+    </condition>
+    <condition property="edition" value="JDBC3">
+        <equals arg1="${jdbc3}" arg2="true"/>
+    </condition>
+    <condition property="edition" value="JDBC2 Enterprise">
+      <and>
+        <available classname="javax.sql.DataSource" />
+        <equals arg1="${jdbc2}" arg2="true"/>
+      </and>
+    </condition>
 
     <!-- determine the connection class -->
-    <property name="connectclass" value="org.postgresql.jdbc1.Connection" />
-    <available property="connectclass" value="org.postgresql.jdbc2.Connection" classname="java.lang.ThreadLocal" />
+    <condition property="connectclass" value="org.postgresql.jdbc1.Jdbc1Connection">
+        <equals arg1="${jdbc1}" arg2="true"/>
+    </condition>
+    <condition property="connectclass" value="org.postgresql.jdbc2.Jdbc2Connection">
+        <equals arg1="${jdbc2}" arg2="true"/>
+    </condition>
+    <condition property="connectclass" value="org.postgresql.jdbc3.Jdbc3Connection">
+        <equals arg1="${jdbc3}" arg2="true"/>
+    </condition>
 
     <!-- Some defaults -->
     <filter token="MAJORVERSION" value="${major}" />
@@ -110,10 +158,14 @@
     <filter token="JDBCCONNECTCLASS" value="${connectclass}" />
     <filter token="DEF_PGPORT" value="${def_pgport}" />
 
+     <fail unless="major" message="'major' undefined. Please follow the directions in README."/>
+     <fail unless="minor" message="'minor' undefined. Please follow the directions in README."/>
+ 
     <!-- Put a check for the current version here -->
 
     <!-- now copy and filter the file -->
     <copy file="${package}/Driver.java.in"
+          overwrite="true"
           tofile="${package}/Driver.java"
           filtering="yes" />
 
@@ -123,6 +175,12 @@
 
   <!-- Prepares the build directory -->
   <target name="prepare">
+    <!-- use the enable_debug option from configure -->
+    <condition property="debug" value="on">
+      <and>
+        <equals arg1="${enable_debug}" arg2="yes" />
+      </and>
+    </condition>
     <mkdir dir="${builddir}" />
     <mkdir dir="${jardir}" />
   </target>
@@ -130,21 +188,21 @@
 
   <!-- This builds the examples -->
   <target name="examples" depends="compile">
-    <javac srcdir="${srcdir}" destdir="${builddir}">
+    <javac srcdir="${srcdir}" destdir="${builddir}" debug="${debug}">
       <include name="example/**" />
       <exclude name="example/corba/**"/>
-      <exclude name="example/blobtest.java" unless="jdk1.2+"/>
+      <exclude name="example/blobtest.java" if="jdbc1"/>
     </javac>
   </target>
 
 
   <!-- Builds the corba example -->
-  <target name="corba" if="jdk1.2+">
+  <target name="corba" if="jdbc2">
     <exec dir="${srcdir}/example/corba" executable="idl2java">
       <arg value="stock.idl" />
     </exec>
 
-    <javac srcdir="${srcdir}" destdir="${builddir}">
+    <javac srcdir="${srcdir}" destdir="${builddir}" debug="${debug}">
       <include name="example/corba/**" />
     </javac>
   </target>
@@ -188,14 +246,15 @@
   <property name="junit.ui" value="textui" />
 
 
-  <target name="test" depends="jar" if="junit">
-    <javac srcdir="${srcdir}" destdir="${builddir}">
-      <include name="${package}/test/jdbc2/**" if="jdk1.2+" />
-      <include name="${package}/test/java2ee/**" if="jdk1.2e+" />
-    </javac>
+  <target name="test" depends="testjdbc2,testjdbc2optional,testjdbc3">
+   </target>
 
-    <java fork="yes" classname="junit.${junit.ui}.TestRunner" taskname="junit" failonerror="true">
-      <arg value="org.postgresql.test.JDBC2Tests" />
+  <target name="testjdbc2" depends="jar" if="jdbc2tests">
+    <javac srcdir="${srcdir}" destdir="${builddir}" debug="${debug}">
+      <include name="${package}/test/jdbc2/*" />
+    </javac>
+   <java fork="yes" classname="junit.${junit.ui}.TestRunner" taskname="junit" failonerror="true">
+      <arg value="org.postgresql.test.jdbc2.Jdbc2TestSuite" />
       <sysproperty key="database" value="${database}" />
       <sysproperty key="username" value="${username}" />
       <sysproperty key="password" value="${password}" />
@@ -205,5 +264,40 @@
       </classpath>
     </java>
   </target>
+
+  <target name="testjdbc2optional" depends="jar" if="jdbc2optionaltests">
+    <javac srcdir="${srcdir}" destdir="${builddir}" debug="${debug}">
+      <include name="${package}/test/jdbc2/optional/**" />
+      <include name="${package}/test/util/**" />
+    </javac>
+    <java fork="yes" classname="junit.${junit.ui}.TestRunner" taskname="junit" failonerror="true">
+      <arg value="org.postgresql.test.jdbc2.optional.OptionalTestSuite" />
+      <sysproperty key="database" value="${database}" />
+      <sysproperty key="username" value="${username}" />
+      <sysproperty key="password" value="${password}" />
+      <classpath>
+        <pathelement location="${builddir}" />
+        <pathelement path="${java.class.path}" />
+      </classpath>
+    </java>
+  </target>
+
+  <target name="testjdbc3" depends="jar" if="jdbc3tests">
+    <javac srcdir="${srcdir}" destdir="${builddir}" debug="${debug}">
+      <include name="${package}/test/jdbc3/*" />
+      <include name="${package}/test/util/*" />
+    </javac>
+    <java fork="yes" classname="junit.${junit.ui}.TestRunner" taskname="junit" failonerror="true">
+      <arg value="org.postgresql.test.jdbc3.Jdbc3TestSuite" />
+      <sysproperty key="database" value="${database}" />
+      <sysproperty key="username" value="${username}" />
+      <sysproperty key="password" value="${password}" />
+      <classpath>
+        <pathelement location="${builddir}" />
+        <pathelement path="${java.class.path}" />
+      </classpath>
+    </java>
+  </target>
+
 
 </project>

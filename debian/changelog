@@ -1,3 +1,17 @@
+libpgjava (7.3-1) unstable; urgency=low
+
+  * New upstream release (extracted from the source of PostgreSQL 7.3)
+  * Build a JDBC2 and a JDBC3 (with DataSource) version in serperate JARs
+    and mention this in the long package description
+  * Build with debhelper >= 4.1.0 to get rid of /usr/doc compatibility
+    symlinks
+  * Use Jikes 1.15 as Java compiler
+  * Depend on java1-runtime | java2-runtime instead of java-common
+  * Added Takashi Okamoto and Ola Lundqvist as uploaders
+  * Standards-Version: 3.5.8 (no changes required)
+
+ -- Stefan Gybas <sgybas@debian.org>  Mon,  2 Dec 2002 22:00:12 +0100
+
 libpgjava (7.2-2) unstable; urgency=low
 
   * Fixed NullPointerException in DatabaseMetaData.getIndexInfo() - this is
