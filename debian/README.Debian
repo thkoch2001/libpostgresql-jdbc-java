@@ -1,0 +1,10 @@
+libpgjava Debian package
+========================
+
+This package has been extracted from the postgresql package because of
+its dependency on a Java VM (unfortunately, there's currently no working
+free JVM available).  The source tree reflects this, that is why the code
+is three levels down.
+
+The JDBC classes implement the JDBC 2.0 API for the Java2 platform. They
+should work fine with JDK 1.1 and Kaffe, though.

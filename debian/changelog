@@ -1,0 +1,147 @@
+libpgjava (7.2-2) unstable; urgency=low
+
+  * Fixed NullPointerException in DatabaseMetaData.getIndexInfo() - this is
+    already fixed in upstream CVS (closes: #147100)
+  * Note: There are no JDBC updates in PostgreSQL 7.2.1 so this is still
+    the current release.
+  * The package can now be compiled with j2sdk1.3 1.3.1-1.1 (which has
+    JAVA_HOME set to /usr/lib/j2se/1.3) and 1.3.1-1 (which has JAVA_HOME set
+    to /usr/lib/j2sdk1.3).
+
+ -- Stefan Gybas <sgybas@debian.org>  Fri, 24 May 2002 16:24:58 +0200
+
+libpgjava (7.2-1) unstable; urgency=low
+
+  * New upstream release (extracted from the source of PostgreSQL 7.2)
+  * Call ant directly instead of using the Makefile
+  * Changed Build-Depends to Build-Depends-Indep (found by Lintian)
+  * Install the JAR as postgresql-7.2.jar and create a symlink as suggested
+    by the latest Java policy
+  * Depend on java-common instead of java-virtual-machine as this package
+    contains just a library
+  * Compile the classes with optimization and debug symbols
+
+ -- Stefan Gybas <sgybas@debian.org>  Wed,  6 Feb 2002 23:43:06 +0100
+
+libpgjava (7.1.3-2) unstable; urgency=low
+
+  * Added DEF_PGPORT to Makefile.global, this is used in Driver.java.in.
+    A NumberFormatException was thrown when trying to open a JDBC
+    connection without specifying a port. Thanks to Andreas Leitner for
+    investigating this problem!
+  * Adapted to new j2sdk1.3 JAVA_HOME (/usr/lib/j2se/1.3)
+
+ -- Stefan Gybas <sgybas@debian.org>  Tue, 25 Sep 2001 22:27:28 +0200
+
+libpgjava (7.1.3-1) unstable; urgency=low
+
+  * New upstream release (extracted from the source of PostgreSQL 7.1.3)
+  * Moved to contrib again as the build process requires ant from contrib
+  * Now that we are in contrib, build using JDK 1.3 to get advanced
+    JDBC 2.0 features
+  * Standards-Version: 3.5.6 (no changes required)
+  * Use debhelper V3
+
+ -- Stefan Gybas <sgybas@debian.org>  Thu, 13 Sep 2001 14:01:58 +0200
+
+libpgjava (7.0.2-3) unstable; urgency=low
+
+  * Don't build javadoc documentation any longer, so the package can be built
+    using only free tools (the documentation is for internal classes only)
+  * Moved from contrib/libs to libs (no longer depends on non-free packages)
+  * Updated README.Debian
+
+ -- Stefan Gybas <sgybas@debian.org>  Tue, 12 Sep 2000 16:45:58 +0200
+
+libpgjava (7.0.2-2) unstable; urgency=low
+
+  * This time really apply Adam's getTimestamp() patch (closes: #67670)
+
+ -- Stefan Gybas <sgybas@debian.org>  Sun, 27 Aug 2000 18:42:56 +0200
+
+libpgjava (7.0.2-1) unstable; urgency=low
+
+  * New upstream release (extracted from the source of PostgreSQL 7.0.2)
+    + getTimestamp() in ResultSet fixed (closes: #67670, thanks go to
+      Adam Heath for the patch)
+  * Added encoding support (closes: #66980, thanks go to Kaz Sasayama
+    for the patch)
+  * Standards-Version: 3.2.1 (no changes required)
+  * Updated debian/rules to debhelper V2
+
+ -- Stefan Gybas <sgybas@debian.org>  Fri, 25 Aug 2000 15:41:23 +0200
+
+libpgjava (7.0-1) unstable; urgency=low
+
+  * New upstream release (extracted from the source of PostgreSQL 7.0)
+    - The Driver class is now org.postgresql.Driver instead of
+      postgresql.Driver - you need to change your sources!
+  * Updated package description and README.Debian
+
+ -- Stefan Gybas <sgybas@debian.org>  Wed, 17 May 2000 10:15:56 +0000
+
+libpgjava (6.5.3-2) unstable; urgency=low
+
+  * Now suggest instead of depend on postgresql since you can access a
+    remote database (closes: #53322)
+
+ -- Stefan Gybas <sgybas@debian.org>  Thu, 30 Dec 1999 23:54:45 +0100
+
+libpgjava (6.5.3-1) unstable; urgency=low
+
+  * New upstream release (extracted from the source of PostgreSQL 6.5.3)
+    - The only change is that getDatabaseProductVersion() returns the
+      new version number
+  * Updated postgresql dependency to >= 6.5.3
+  * Standards-Version 3.1.1 (no changes required)
+  * Fixed typo in previous changelog
+  * Corrected build dependencies: jikes -> java-compiler
+
+ -- Stefan Gybas <sgybas@debian.org>  Sun,  5 Dec 1999 15:37:25 +0100
+
+libpgjava (6.5.2-1) unstable; urgency=low
+
+  * New upstream release (extracted from the source of PostgreSQL 6.5.2)
+    (closes: #45549)
+  * New maintainer
+  * The package is actually architecture independent
+  * Standards-Version 3.1.0
+    - FHS (built using debhelper 2.0.40+)
+    - Added build dependencies
+  * Conforms to the Debian Java Policy 1.0 (closes: #44470, #45548)
+    - Install JAR file in /usr/share/java
+    - Depend on java-virtual-machine instead of jdk1.1
+  * Install upstream changelog and javadoc documentation
+
+ -- Stefan Gybas <sgybas@debian.org>  Sun,  7 Nov 1999 13:49:32 +0100
+
+libpgjava (6.5-1) unstable; urgency=low
+
+  * New upstream release (extracted from the source of PostgreSQL 6.5)
+
+ -- Oliver Elphick <Oliver.Elphick@lfix.co.uk>  Wed, 30 Jun 1999 22:15:34 +0100
+
+libpgjava (6.4.2-1) unstable; urgency=low
+
+  * New upstream release (extracted from the source of PostgreSQL 6.4.2).
+
+ -- Oliver Elphick <Oliver.Elphick@lfix.co.uk>  Sat,  3 Oct 1998 11:13:42 +0100
+
+libpgjava (6.3.2-2) unstable; urgency=low
+
+  * Changed dependency from jdk-runtime to jdk1.1
+
+ -- Oliver Elphick <Oliver.Elphick@lfix.co.uk>  Sat,  3 Oct 1998 11:13:42 +0100
+
+libpgjava (6.3.2-1) frozen unstable; urgency=low
+
+  * 6.3.2-1 Upstream bugfixing release
+
+ -- Oliver Elphick <Oliver.Elphick@lfix.co.uk>  Mon, 20 Apr 1998 17:17:30 +0100
+
+libpgjava (6.3.1-5) frozen unstable; urgency=low
+
+  * Separated libpgjava from postgresql because of its dependency for
+    compilation on non-free jdk.
+
+ -- Oliver Elphick <Oliver.Elphick@lfix.co.uk>  Tue, 31 Mar 1998 22:58:25 +0100
