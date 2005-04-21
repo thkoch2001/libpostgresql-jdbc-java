@@ -1,3 +1,9 @@
+libpgjava (7.4.7-3) unstable; urgency=low
+
+  * Built with sources...
+
+ -- Arnaud Vandyck <avdyk@debian.org>  Thu, 21 Apr 2005 14:25:11 +0200
+
 libpgjava (7.4.7-2) unstable; urgency=low
 
   * Build with free vm's:
