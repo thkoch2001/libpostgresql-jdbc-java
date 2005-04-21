@@ -1,0 +1,20 @@
+debian/jdbc2_interface directory
+========================
+
+The jdbc2_interface directory contains JDBC specification 2 interfaces
+from the gnu classpath project. This interface sources are needed to 
+compile a JDBC 2 driver with the free runtimes - as they already implement
+JDBC3 specification.
+
+These sources are only needed during compile time and are not included
+in the binary jar files produced by this package.
+
+The sources are a checkout from the gnu classpath project 
+<http://savannah.gnu.org/cvs/?group=classpath> with tag
+classpath-0_04-release. 
+
+Upstream Authors: Classpath Project <classpath@gnu.org>
+
+Copyright:
+GNU Classpath is distributed under the terms of the 
+GNU General Public License.

@@ -4,29 +4,23 @@
 include /usr/share/cdbs/1/rules/debhelper.mk
 include /usr/share/cdbs/1/rules/simple-patchsys.mk
 
-# Build using Blackdown's JDK 1.3 and 1.4 Debian packages
-export JITC_PROCESSOR_TYPE=6
-#JAVA13_HOME := /usr/lib/j2sdk1.3-blackdown
-JAVA13_HOME := /usr/lib/j2se/1.3
-#JAVA14_HOME := /usr/lib/j2sdk1.4-sun
-JAVA14_HOME := /usr/lib/j2se/1.4
+JAVA_HOME := /usr/lib/kaffe
 ANT_HOME    := /usr/share/ant1.6
 
 UPSTREAM_VERSION := $(shell head -1 debian/changelog | cut -f2 -d\( | cut -f1 -d\) | cut -f1 -d\-)
 majorversion := $(shell echo $(UPSTREAM_VERSION) | sed 's/^\([0-9][0-9]*\)\..*$$/\1/')
 minorversion := $(shell echo $(UPSTREAM_VERSION) | sed 's/^[0-9][0-9]*\.\([0-9][0-9]*\).*$$/\1/')
 
-
 clean::
 	rm -f postgresql-jdbc*.jar
 	-cd src/interfaces/jdbc && sh -c "CLASSPATH=$(ANT_HOME)/lib/ant.jar:$(ANT_HOME)/lib/ant-launcher.jar:/usr/share/java/xmlParserAPIs.jar:/usr/share/java/xercesImpl.jar \
-		$(JAVA13_HOME)/bin/java -Dant.home=$(ANT_HOME) \
+		$(JAVA_HOME)/bin/java -Dant.home=$(ANT_HOME) \
 		org.apache.tools.ant.Main clean"
-
-
 build:
-	cd src/interfaces/jdbc && sh -c "CLASSPATH=$(ANT_HOME)/lib/ant.jar:$(ANT_HOME)/lib/ant-launcher.jar:/usr/share/java/xmlParserAPIs.jar:/usr/share/java/xercesImpl.jar:$(JAVA13_HOME)/lib/tools.jar \
-		$(JAVA13_HOME)/bin/java -Dant.home=$(ANT_HOME) \
+	# move jdbc2 interfaces extracted from gnu classpath to the source directory
+	cp -r debian/jdbc2_interfaces/* src/interfaces/jdbc
+	cd src/interfaces/jdbc && sh -c "CLASSPATH=$(ANT_HOME)/lib/ant.jar:$(ANT_HOME)/lib/ant-launcher.jar:/usr/share/java/xmlParserAPIs.jar:/usr/share/java/xercesImpl.jar \
+		$(JAVA_HOME)/bin/java -Djdbc2=true -Dtarget=1.3 -Dant.home=$(ANT_HOME) -Dbuild.compiler=jikes \
 		org.apache.tools.ant.Main jar \
 		-Dmajor=$(majorversion) -Dminor=$(minorversion) \
 		-Dfullversion=$(UPSTREAM_VERSION) -Ddef_pgport=5432 \
@@ -34,15 +28,16 @@ build:
 	mv src/interfaces/jdbc/jars/postgresql.jar postgresql-jdbc2.jar
 	rm src/interfaces/jdbc/org/postgresql/Driver.java
 	rm -rf src/interfaces/jdbc/build src/interfaces/jdbc/jars
+	# remove the jdbc2 interfaces classes before jdbc3 driver build
+	rm -rf src/interfaces/jdbc/java
 
-	cd src/interfaces/jdbc && sh -c "CLASSPATH=$(ANT_HOME)/lib/ant.jar:$(ANT_HOME)/lib/ant-launcher.jar:$(JAVA14_HOME)/lib/tools.jar:$(JAVA14_HOME)/jre/lib/jsse.jar \
-		$(JAVA14_HOME)/bin/java -Dant.home=$(ANT_HOME) \
+	cd src/interfaces/jdbc && sh -c "CLASSPATH=$(ANT_HOME)/lib/ant.jar:$(ANT_HOME)/lib/ant-launcher.jar \
+		$(JAVA_HOME)/bin/java -Djdbc3=true -Dtarget=1.4 -Dssl=true -Dant.home=$(ANT_HOME) \
 		org.apache.tools.ant.Main jar \
 		-Dmajor=$(majorversion) -Dminor=$(minorversion) \
 		-Dfullversion=$(UPSTREAM_VERSION) -Ddef_pgport=5432 \
 		-Denable_debug=true"
 	mv src/interfaces/jdbc/jars/postgresql.jar postgresql-jdbc3.jar
-
 
 install/libpgjava::
 	install -m 644 postgresql-jdbc2.jar debian/libpgjava/usr/share/java/postgresql-jdbc2-$(UPSTREAM_VERSION).jar

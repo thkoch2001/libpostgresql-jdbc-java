@@ -1,0 +1,15 @@
+--- src/interfaces/jdbc/org/postgresql/jdbc2/optional/PooledConnectionImpl.java.orig	2004-02-24 14:11:44.000000000 +0100
++++ src/interfaces/jdbc/org/postgresql/jdbc2/optional/PooledConnectionImpl.java	2005-04-02 13:47:50.000000000 +0200
+@@ -324,10 +324,10 @@
+      * Connection proxy for the getConnection method.
+      */
+     private static class StatementHandler implements InvocationHandler {
+-        private ConnectionHandler con;
++        private PooledConnectionImpl.ConnectionHandler con;
+         private Statement st;
+ 
+-        public StatementHandler(ConnectionHandler con, Statement st) {
++        public StatementHandler(PooledConnectionImpl.ConnectionHandler con, Statement st) {
+             this.con = con;
+             this.st = st;
+         }

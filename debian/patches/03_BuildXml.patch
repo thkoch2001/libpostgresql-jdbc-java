@@ -1,0 +1,40 @@
+--- src/interfaces/jdbc/build.xml.orig	2005-04-03 14:56:00.000000000 +0200
++++ src/interfaces/jdbc/build.xml	2005-04-03 14:55:14.000000000 +0200
+@@ -34,6 +34,9 @@
+     Important: This must have the following order: jdbc1, jdbc2, jdbc3
+   -->
+   <target name="check_versions">
++   <!-- Comment out so no jdbc decision is done - this way
++        we can set JDBC Specification directly during build with
++        -Djdbc2=true or -Djdbc3=true
+     <condition property="jdbc1">
+       <equals arg1="${ant.java.version}" arg2="1.1"/>
+     </condition>
+@@ -48,9 +51,13 @@
+         <equals arg1="${ant.java.version}" arg2="1.4"/>
+ 	<equals arg1="${ant.java.version}" arg2="1.5"/>
+       </or>
+-    </condition>
++    </condition>-->
+     <available property="datasource" classname="javax.sql.DataSource"/>
+-    <available property="ssl" classname="javax.net.ssl.SSLSocketFactory"/>
++    
++    <!-- Comment out so no SSL decision is done - this way
++        we can request SSL inclusion during build explicit with 
++        -Dssl=true (for no SSL support just don't set -Dsss to anything)    
++    <available property="ssl" classname="javax.net.ssl.SSLSocketFactory"/>-->  
+     <available property="junit" classname="junit.framework.Test"/>
+     <available property="junit.task" classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask"/>
+     <condition property="jdbc2tests">
+@@ -115,8 +122,9 @@
+ 
+     <available classname="org.postgresql.Driver" property="old.driver.present" />
+     <fail message="Old driver was detected on classpath or in jre/lib/ext, please remove and try again." if="old.driver.present" />
+-
+-    <javac classpath="${srcdir}" srcdir="${srcdir}" destdir="${builddir}" debug="${debug}">
++    
++    <!-- Include target flag for explicit specification of target 1.3 or 1.4 (JDBC2 = 1.3 / JDBC3 = 1.4) -->
++    <javac classpath="${srcdir}" srcdir="${srcdir}" destdir="${builddir}" debug="${debug}" target="${target}">
+       <!-- This is the core of the driver.  It is common for all three versions. -->
+        <include name="${package}/*.java" />
+        <include name="${package}/core/**" />

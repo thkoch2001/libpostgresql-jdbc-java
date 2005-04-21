@@ -1,7 +1,8 @@
 libpgjava Debian package
 ========================
 
-This package has been extracted from the postgresql package because of
-its dependency on a Java VM (unfortunately, there's currently no working
-free JVM available).  The source tree reflects this, that is why the code
-is three levels down.
+This package has been extracted from the postgresql package because 
+it formerly needed a non-free Java VM to build the different versions
+of the JDBC specification.
+
+Today this is just a relict of the past.
