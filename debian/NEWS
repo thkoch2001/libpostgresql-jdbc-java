@@ -1,0 +1,8 @@
+libpgjava (8.0-312-1) unstable; urgency=low
+
+  Starting with this release of the JDBC driver for Postgresql 8.0 
+  postgresql.jar is no longer linked to the JDBC 2 jar. It is now 
+  pointing to the JDBC 3 jar. If you explicitly need a JDBC 2 
+  driver you need to switch to the postgresql-jdbc2.jar instead.
+
+ -- Wolfgang Baer <WBaer@gmx.de>  Wed, 10 Aug 2005 20:52:08 +0200

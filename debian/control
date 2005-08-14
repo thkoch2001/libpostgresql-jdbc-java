@@ -3,18 +3,29 @@ Section: libs
 Priority: optional
 Maintainer: Debian Java Maintainers <pkg-java-maintainers@lists.alioth.debian.org>
 Uploaders: Stefan Gybas <sgybas@debian.org>, Arnaud Vandyck <avdyk@debian.org>, Wolfgang Baer <WBaer@gmx.de>
-Build-Depends-Indep: debhelper (>= 4.2.30), cdbs, kaffe (>= 2:1.1.4.PRECVS12-1), libant1.6-java, libxerces2-java
-Standards-Version: 3.6.1
+Build-Depends-Indep: debhelper (>= 4.2.30), cdbs, kaffe (>= 2:1.1.5-1), ant, libxerces2-java
+Standards-Version: 3.6.2
+
+Package: libpg-java
+Architecture: all
+Section: libs
+Priority: optional
+Depends: kaffe | java1-runtime | java2-runtime
+Suggests: postgresql (>= 7.2)
+Conflicts: libpgjava (<= 7.4.7-3)
+Provides: libpgjava
+Replaces: libpgjava
+Description: Java database (JDBC) driver for PostgreSQL
+ Java classes for communication with the PostgreSQL 7.2 up to 8.0 database
+ backend (local or remote) using JDBC. This package contains two Java archives
+ (JARs), one that supports JDBC 2.0 (for JDK 1.3 and up) and one that supports
+ JDBC 3.0 and SSL (for JDK 1.4 and up).
 
 Package: libpgjava
 Architecture: all
 Section: libs
 Priority: optional
-Depends: kaffe | java1-runtime | java2-runtime
-Suggests: postgresql (>= 7.1.3)
-Description: Java database (JDBC) driver for PostgreSQL
- Java classes for communication with the PostgreSQL 7.1/7.2/7.3/7.4 database
- backend (local or remote) using JDBC. This package contains two Java archives
- (JARs), one that supports JDBC 2.0 (for JDK 1.2 and up) and one that supports
- JDBC 3.0 and SSL (for JDK 1.4 and up).
-
+Depends: libpg-java
+Description: Java database (JDBC) driver for PostgreSQL - transitional package
+ A dummy package for transition to the new libpg-java package. It can be
+ removed after the upgrade.

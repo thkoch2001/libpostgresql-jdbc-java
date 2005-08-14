@@ -1,0 +1,21 @@
+--- org/postgresql/util/PSQLException.java.in.orig	2005-06-24 19:47:01.000000000 +0200
++++ org/postgresql/util/PSQLException.java.in	2005-06-24 19:47:41.000000000 +0200
+@@ -21,7 +21,8 @@
+     public PSQLException(String msg, PSQLState state, Throwable cause)
+     {
+         super(addCauseToMessage(msg, cause), state == null ? null : state.getState());
+-        initCause(cause); // Calls either the 1.4 Throwable impl or our impl below.
++        @NOINITCAUSE@ initCauseA(cause); // Calls either the 1.4 Throwable impl or our impl below.
++        @INITCAUSE@ initCause(cause);
+         if (Driver.logDebug)
+             Driver.debug("Exception: " + this);
+ 
+@@ -60,7 +61,7 @@
+     }
+ 
+     // Dummy initCause() for pre-1.4 JVMs
+-    @NOINITCAUSE@ public void initCause(Throwable cause) {
++    @NOINITCAUSE@ public void initCauseA(Throwable cause) {
+         @NOINITCAUSE@ }
+ 
+ 

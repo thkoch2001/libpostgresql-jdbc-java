@@ -1,3 +1,31 @@
+libpgjava (8.0-312-1) unstable; urgency=low
+
+  * New upstream release
+    + Supports Postgresql 7.2 up to 8.0 releases
+    + Upstream supplies its own source packages for the jdbc driver 
+      starting with release 8.0 - no longer extracted from postgresql
+  * Changed library name to comply with java policy (closes: #275417)
+    + Added conflicts, replaces with old binary
+    + Changed debian/rules and debhelper files accordingly
+    + Added dummy package libpgjava for transition
+  * Updated everything to the new source package structure
+  * Updated copyright license and download location
+  * Updated control file for minimum supported version 7.2
+  * Deleted README.Debian - no longer needed
+  * Dropped patches:
+    + 01_getInfo_exception_fix.patch - JDBC 1 no longer implemented
+    + 02_jikes_jdbc2-optional_compilefix.patch - no longer needed
+  * Modified/New patches:
+    + Renamed 03_BuildXml.patch to 01_BuildXml.patch and updated
+    + 02_PSQLException_JDK13.patch (depends on 01_BuildXml.patch)
+  * postgresql.jar now links to the JDBC 3 jar (added NEWS)
+  * Changed build-dep libant1.6-java to ant (control, rules)
+  * Standards-Version: 3.6.2 - no changes
+
+  * Upload sponsored by Petter Reinholdtsen
+
+ -- Wolfgang Baer <WBaer@gmx.de>  Wed, 10 Aug 2005 20:52:08 +0200
+
 libpgjava (7.4.7-3) unstable; urgency=low
 
   * Built with sources...
