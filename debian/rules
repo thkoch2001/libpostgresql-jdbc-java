@@ -20,7 +20,7 @@ build:
 	cp -r debian/jdbc2_interfaces/* .
 
 	# build JDBC 2
-	ant -Djdbc2=true -Dtarget=1.3 -Dbuild.compiler=jikes jar
+	ant -Djdbc2=true -Dtarget=1.3 jar
 	
 	mv jars/postgresql.jar postgresql-jdbc2.jar
 	

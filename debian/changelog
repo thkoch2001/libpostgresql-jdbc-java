@@ -1,3 +1,10 @@
+libpgjava (8.1-404-1) unstable; urgency=low
+
+  * New upstream release (closes: #340739)
+  * Removed build.compiler property in debian/rules as preset in kaffe
+
+ -- Wolfgang Baer <WBaer@gmx.de>  Tue, 29 Nov 2005 14:41:36 +0100
+
 libpgjava (8.0-312-1) unstable; urgency=low
 
   * New upstream release
