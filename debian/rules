@@ -13,29 +13,29 @@ clean::
 	rm -rf build jars java
 
 build:
-	# chmod -x example/corba/stock.idl to fix lintian/linda warning
+	#chmod -x example/corba/stock.idl to fix lintian/linda warning
 	chmod -x example/corba/stock.idl
 
-	# move jdbc2 interfaces to the source directory
-	cp -r debian/jdbc2_interfaces/* .
+# move jdbc2 interfaces to the source directory
+	#cp -r debian/jdbc2_interfaces/* .
 
-	# build JDBC 2
-	ant -Djdbc2=true -Dtarget=1.3 jar
-	
-	mv jars/postgresql.jar postgresql-jdbc2.jar
-	
-	# remove stuff from jdbc2 built including jdbc2 interfaces
-	rm org/postgresql/Driver.java org/postgresql/util/PSQLException.java
-	rm -rf build jars java
-	
-	# build JDBC 3
-	ant -Djdbc3=true -Dtarget=1.4 -Dssl=true jar
+# build JDBC 2
+	#ant -Djdbc2=true -Dtarget=1.3 -Dsource=1.3 jar
+
+	-mv jars/postgresql.jar postgresql-jdbc2.jar
+
+# remove stuff from jdbc2 built including jdbc2 interfaces
+	-rm org/postgresql/Driver.java org/postgresql/util/PSQLException.java
+	-rm -rf build jars java
+
+# build JDBC 3
+	ant -Djdbc3=true -Dtarget=1.4 -Dsource=1.4 -Dssl=true jar
 
 	mv jars/postgresql.jar postgresql-jdbc3.jar
 
 install/libpg-java::
-	install -m 644 postgresql-jdbc2.jar debian/libpg-java/usr/share/java/postgresql-jdbc2-$(UPSTREAM_VERSION).jar
-	ln -s postgresql-jdbc2-$(UPSTREAM_VERSION).jar debian/libpg-java/usr/share/java/postgresql-jdbc2.jar
+	#install -m 644 postgresql-jdbc2.jar debian/libpg-java/usr/share/java/postgresql-jdbc2-$(UPSTREAM_VERSION).jar
+	#ln -s postgresql-jdbc2-$(UPSTREAM_VERSION).jar debian/libpg-java/usr/share/java/postgresql-jdbc2.jar
 	install -m 644 postgresql-jdbc3.jar debian/libpg-java/usr/share/java/postgresql-jdbc3-$(UPSTREAM_VERSION).jar
 	ln -s postgresql-jdbc3-$(UPSTREAM_VERSION).jar debian/libpg-java/usr/share/java/postgresql-jdbc3.jar
 	ln -s postgresql-jdbc3-$(UPSTREAM_VERSION).jar debian/libpg-java/usr/share/java/postgresql.jar
