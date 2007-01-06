@@ -1,5 +1,5 @@
---- build.xml.orig	2005-06-24 18:20:08.000000000 +0200
-+++ build.xml	2005-06-24 19:04:03.000000000 +0200
+--- build.xml.orig	2006-11-29 05:00:15.000000000 +0100
++++ build.xml	2007-01-06 15:12:57.000000000 +0100
 @@ -32,6 +32,9 @@
    <property file="build.properties"/>
  
@@ -9,20 +9,15 @@
 +       -Djdbc2=true or -Djdbc3=true
      <condition property="jdbc2">
        <or>
-         <equals arg1="${ant.java.version}" arg2="1.2"/>
-@@ -43,7 +46,7 @@
-     </condition>
-     <condition property="jdbc3g">
- 	<equals arg1="${ant.java.version}" arg2="1.5"/>
+         <equals arg1="${java.specification.version}" arg2="1.2"/>
+@@ -59,10 +62,13 @@
+ 	<isset property="jdbc3g" />
+ 	<isset property="jdbc4" />
+       </or>
 -    </condition>
 +    </condition>-->
-     <condition property="jdbc3any">
-       <or>
-         <isset property="jdbc3" />
-@@ -52,7 +55,10 @@
-     </condition>
  
-     <available property="datasource" classname="javax.sql.DataSource"/>
+     <available property="datasourceclass" classname="javax.sql.DataSource"/>
 -    <available property="ssl" classname="javax.net.ssl.SSLContext"/>
 +    <!-- Comment out so no SSL decision is done - this way
 +         we can request SSL inclusion during build explicit with 
@@ -31,7 +26,7 @@
      <available property="junit" classname="junit.framework.Test"/>
      <available property="junit.task" classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask"/>
  
-@@ -107,8 +113,8 @@
+@@ -111,8 +117,8 @@
  
      <available classname="org.postgresql.Driver" property="old.driver.present" />
      <fail message="Old driver was detected on classpath or in jre/lib/ext, please remove and try again." if="old.driver.present" />
@@ -42,8 +37,8 @@
        <!-- This is the core of the driver.  It is common for all versions. -->
         <include name="${package}/*.java" />
         <include name="${package}/core/**" />
-@@ -225,6 +231,15 @@
-       <not><equals arg1="${jdbc3any}" arg2="true" /></not>
+@@ -277,6 +283,15 @@
+       <not><equals arg1="${jdbc3plus}" arg2="true" /></not>
      </condition>
  
 +    <condition property="InitCause" value="">
@@ -58,7 +53,7 @@
      <!-- determine the ssl status -->
      <condition property="ssl_config" value="">
          <equals arg1="${ssl}" arg2="true"/>
-@@ -251,6 +266,7 @@
+@@ -306,6 +321,7 @@
      <filter token="DEF_PGPORT" value="${def_pgport}" />
      <filter token="SSL" value="${ssl_config}" />
      <filter token="NOINITCAUSE" value="${noInitCause}" />
