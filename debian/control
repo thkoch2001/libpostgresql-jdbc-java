@@ -2,9 +2,12 @@ Source: libpgjava
 Section: libs
 Priority: optional
 Maintainer: Debian Java Maintainers <pkg-java-maintainers@lists.alioth.debian.org>
-Uploaders: Stefan Gybas <sgybas@debian.org>, Arnaud Vandyck <avdyk@debian.org>, Wolfgang Baer <WBaer@gmx.de>, Matthias Klose <doko@ubuntu.com>
+Uploaders: Arnaud Vandyck <avdyk@debian.org>, Matthias Klose <doko@ubuntu.com>, Michael Koch <konqueror@gmx.de>
 Build-Depends-Indep: debhelper (>= 4.2.30), cdbs, java-gcj-compat-dev, ant, libxerces2-java
-Standards-Version: 3.7.2
+Standards-Version: 3.7.3
+Vcs-Svn: svn://svn.debian.org/svn/pkg-java/trunk/libpgjava
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-java/trunk/libpgjava
+Homepage: http://jdbc.postgresql.org/
 
 Package: libpg-java
 Architecture: all
@@ -16,7 +19,7 @@ Conflicts: libpgjava (<= 7.4.7-3)
 Provides: libpgjava
 Replaces: libpgjava
 Description: Java database (JDBC) driver for PostgreSQL
- Java classes for communication with the PostgreSQL 7.2 up to 8.2 database
+ Java classes for communication with the PostgreSQL 7.2 up to 8.3 database
  backend (local or remote) using JDBC. This package contains two Java archives
  (JARs), one that supports JDBC 2.0 (for JDK 1.3 and up) and one that supports
  JDBC 3.0 and SSL (for JDK 1.4 and up).
