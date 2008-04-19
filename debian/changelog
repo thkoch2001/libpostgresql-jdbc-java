@@ -3,6 +3,7 @@ libpgjava (8.2-504-2) UNRELEASED; urgency=low
   * Updated description to mention PostgreSQL 8.3 as supported.
     Closes: #398348
   * Added Homepage, Vcs-Svn and Vcs-Browser fields.
+  * Added watch file.
   * Added myself to Uploaders.
   * Removed Stafan and Wolfgang from Uploaders.
   * Updated Standards-Version to 3.7.3
