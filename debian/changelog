@@ -1,14 +1,15 @@
-libpgjava (8.2-504-2) UNRELEASED; urgency=low
+libpgjava (8.2-504-3) UNRELEASED; urgency=low
 
   * Updated description to mention PostgreSQL 8.3 as supported.
     Closes: #398348
+  * Removed libpgjava transitional package. Closes: #477557
   * Added Homepage, Vcs-Svn and Vcs-Browser fields.
   * Added watch file.
   * Added myself to Uploaders.
   * Removed Stafan and Wolfgang from Uploaders.
   * Updated Standards-Version to 3.7.3
 
- -- Michael Koch <konqueror@gmx.de>  Fri, 18 Apr 2008 07:23:04 +0200
+ -- Michael Koch <konqueror@gmx.de>  Thu, 24 Apr 2008 20:02:06 +0200
 
 libpgjava (8.2-504-1) unstable; urgency=low
 
