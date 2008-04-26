@@ -3,7 +3,8 @@ Section: libs
 Priority: optional
 Maintainer: Debian Java Maintainers <pkg-java-maintainers@lists.alioth.debian.org>
 Uploaders: Arnaud Vandyck <avdyk@debian.org>, Matthias Klose <doko@ubuntu.com>, Michael Koch <konqueror@gmx.de>
-Build-Depends-Indep: debhelper (>= 4.2.30), cdbs, java-gcj-compat-dev, ant, libxerces2-java
+Build-Depends: debhelper (>= 5), cdbs
+Build-Depends-Indep: java-gcj-compat-dev, ant, libxerces2-java
 Standards-Version: 3.7.3
 Vcs-Svn: svn://svn.debian.org/svn/pkg-java/trunk/libpgjava
 Vcs-Browser: http://svn.debian.org/wsvn/pkg-java/trunk/libpgjava
