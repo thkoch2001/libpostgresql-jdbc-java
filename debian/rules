@@ -8,11 +8,6 @@ export JAVA_HOME := /usr/lib/jvm/java-gcj
 
 UPSTREAM_VERSION := $(shell head -1 debian/changelog | cut -f2 -d\( | cut -f1 -d\) | cut -f1 -d\-)
 
-clean::
-	rm -f org/postgresql/Driver.java org/postgresql/util/PSQLException.java postgresql-jdbc*.jar
-	rm -rf build jars java
-	find -name '*.class' | xargs -r rm -f
-
 build:
 # move jdbc2 interfaces to the source directory
 	#cp -r debian/jdbc2_interfaces/* .
@@ -23,7 +18,7 @@ build:
 	-mv jars/postgresql.jar postgresql-jdbc2.jar
 
 # remove stuff from jdbc2 built including jdbc2 interfaces
-	-rm org/postgresql/Driver.java org/postgresql/util/PSQLException.java
+	-rm org/postgresql/Driver.java
 	-rm -rf build jars java
 
 # build JDBC 3

@@ -1,3 +1,16 @@
+libpgjava (8.4-701-1) unstable; urgency=low
+
+  * New upstream release.
+  * Removed all old unused JDBC2 stuff.
+  * Moved java-gcj-compat-dev and ant to Build-Depends.
+  * Make libpg-java Depends on default-jre-headless and its headless
+    friends.
+  * Build-Depends on debhelper >= 7.
+  * Moved package to section 'java'.
+  * Updated Standards-Version to 3.8.3.
+
+ -- Michael Koch <konqueror@gmx.de>  Sat, 26 Sep 2009 13:39:36 +0200
+
 libpgjava (8.2-504-2) unstable; urgency=low
 
   * Updated description to mention PostgreSQL 8.3 as supported.
