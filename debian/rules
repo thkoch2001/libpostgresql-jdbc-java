@@ -1,35 +1,31 @@
 #!/usr/bin/make -f
-# debian/rules file for libpgjava (uses cdbs)
+# debian/rules file for libpgjava (uses debhelper and javahelper)
 
-include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/cdbs/1/rules/simple-patchsys.mk
+%:
+	dh $@ --with javahelper
 
-export JAVA_HOME := /usr/lib/jvm/java-gcj
 
-UPSTREAM_VERSION := $(shell head -1 debian/changelog | cut -f2 -d\( | cut -f1 -d\) | cut -f1 -d\-)
-
-build:
-# move jdbc2 interfaces to the source directory
-	#cp -r debian/jdbc2_interfaces/* .
-
-# build JDBC 2
-	#ant -Djdbc2=true -Dtarget=1.3 -Dsource=1.3 jar
-
-	-mv jars/postgresql.jar postgresql-jdbc2.jar
-
-# remove stuff from jdbc2 built including jdbc2 interfaces
-	-rm org/postgresql/Driver.java
-	-rm -rf build jars java
-
-# build JDBC 3
-	ant -Djdbc3=true -Dtarget=1.4 -Dsource=1.4 -Dssl=true jar
-
+override_dh_auto_build:
+# build JDBC 3 with java-gcj
+	ant clean
+	JAVA_HOME=/usr/lib/jvm/java-gcj ant -Djdbc3=true -Dtarget=1.4 -Dsource=1.4 -Dssl=true jar
 	mv jars/postgresql.jar postgresql-jdbc3.jar
+# build JDBC 4 with default-java
+	ant clean
+	JAVA_HOME=/usr/lib/jvm/default-java ant -Djdbc4=true -Dtarget=1.6 -Dsource=1.6 -Dssl=true jar publicapi
+	mv jars/postgresql.jar postgresql-jdbc4.jar
 
-install/libpg-java::
-	#install -m 644 postgresql-jdbc2.jar debian/libpg-java/usr/share/java/postgresql-jdbc2-$(UPSTREAM_VERSION).jar
-	#ln -s postgresql-jdbc2-$(UPSTREAM_VERSION).jar debian/libpg-java/usr/share/java/postgresql-jdbc2.jar
-	install -m 644 postgresql-jdbc3.jar debian/libpg-java/usr/share/java/postgresql-jdbc3-$(UPSTREAM_VERSION).jar
-	ln -s postgresql-jdbc3-$(UPSTREAM_VERSION).jar debian/libpg-java/usr/share/java/postgresql-jdbc3.jar
-	ln -s postgresql-jdbc3-$(UPSTREAM_VERSION).jar debian/libpg-java/usr/share/java/postgresql.jar
+
+# remove the created jars in our clean
+override_jh_clean:
+	jh_clean
+	rm -f postgresql-jdbc3.jar
+	rm -f postgresql-jdbc4.jar
+
+# add a symlink from postgresql.jar to postgresql-jdbc3.jar
+# This maintains compatibility with the previous version of
+# this package
+override_jh_installlibs:
+	jh_installlibs
+	dh_link usr/share/java/postgresql-jdbc3.jar usr/share/java/postgresql.jar
 

@@ -1,0 +1,12 @@
+Modify the javadoc build process so it links against the JDK
+javadoc.
+--- a/build.xml
++++ b/build.xml
+@@ -415,6 +415,7 @@
+ 	<include name="ds/common/BaseDataSource.java" />
+ 	<include name="xa/PGXADataSource.java" />
+       </fileset>
++      <link href="/usr/share/doc/default-jdk-doc/api" />
+     </javadoc>
+   </target>
+ 

@@ -1,3 +1,16 @@
+libpgjava (8.4-702-1) unstable; urgency=low
+
+  * New upstream release (closes: #612643)
+  * Build JDBC4 libraries in addition to JDBC3.
+  * Use debhelper and javahelper rather than cdbs
+  * Updated Standards-Version to 3.9.1.
+  * Don't depend on a jre (to match current java package policy)
+  * Added myself to Uploaders.
+  * Changed source format to 3.0 (quilt).
+  * Added a package containing the public API documentation.
+
+ -- Andrew Ross <ubuntu@rossfamily.co.uk>  Sat, 12 Feb 2011 16:41:22 +0000
+
 libpgjava (8.4-701-1) unstable; urgency=low
 
   * New upstream release.
