@@ -1,2 +1,2 @@
 version=3
-http://jdbc.postgresql.org/download.html download/postgresql-jdbc-(8\..*)\.src\.tar\.gz
+http://jdbc.postgresql.org/download.html download/postgresql-jdbc-(.*)\.src\.tar\.gz

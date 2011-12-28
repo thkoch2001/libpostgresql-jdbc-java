@@ -6,26 +6,26 @@ Uploaders: Arnaud Vandyck <avdyk@debian.org>, Matthias Klose <doko@ubuntu.com>,
  Michael Koch <konqueror@gmx.de>, Andrew Ross <ubuntu@rossfamily.co.uk>
 Build-Depends: debhelper (>= 7.0.50~), java-gcj-compat-dev, ant, javahelper (>=0.32~) 
 Build-Depends-Indep: libxerces2-java, default-jdk, default-jdk-doc
-Standards-Version: 3.9.1
+Standards-Version: 3.9.2
 Vcs-Svn: svn://svn.debian.org/svn/pkg-java/trunk/libpgjava
 Vcs-Browser: http://svn.debian.org/wsvn/pkg-java/trunk/libpgjava
 Homepage: http://jdbc.postgresql.org/
 
-Package: libpg-java
+Package: libpostgresql-jdbc-java
 Architecture: all
 Depends: ${java:Depends}, ${misc:Depends}
 Recommends: ${java:Recommends}
 Suggests: postgresql (>= 8.2)
-Conflicts: libpgjava (<= 7.4.7-3)
-Provides: libpgjava
-Replaces: libpgjava
+Conflicts: libpgjava (<= 7.4.7-3), libpg-java (<= 8.4-702-1)
+Provides: libpgjava, libpg-java
+Replaces: libpgjava, libpg-java
 Description: Java database (JDBC) driver for PostgreSQL
- Java classes for communication with the PostgreSQL 7.2 up to 8.4 database
+ Java classes for communication with the PostgreSQL 7.2 up to 9.1 database
  backend (local or remote) using JDBC. This package contains two Java archives
  (JARs), one that supports JDBC 3.0 and SSL (for JDK 1.4 and up) and one that 
  supports JDBC 4.0 and SSL (for JDK 1.6 and up).
 
-Package: libpg-java-doc
+Package: libpostgresql-jdbc-java-doc
 Section: doc
 Architecture: all
 Depends: ${java:Depends}, ${misc:Depends}
