@@ -3,6 +3,7 @@ libpgjava (9.1-901-1) unstable; urgency=low
   * New upstream release. (closes: #645854)
   * Change binary package name to libpostgresql-jdbc-java.
       (closes: #336245)
+  * Remove Michael Koch from Uploaders. (closes: #654090)
   * Bump standards version to 3.9.2 (no changes).
 
  -- Andrew Ross <ubuntu@rossfamily.co.uk>  Sat, 24 Dec 2011 23:33:56 +0000
