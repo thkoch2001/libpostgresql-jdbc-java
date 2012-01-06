@@ -30,6 +30,9 @@ Section: doc
 Architecture: all
 Depends: ${java:Depends}, ${misc:Depends}
 Recommends: ${java:Recommends}
+Conflicts: libpg-java-doc (<= 8.4-702-1)
+Provides: libpg-java-doc
+Replaces: libpg-java-doc
 Description: Java database (JDBC) driver for PostgreSQL (documentation)
  Java classes for communication with the PostgreSQL 7.2 up to 8.4 database
  backend (local or remote) using JDBC. This package contains two Java archives
