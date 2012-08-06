@@ -1,0 +1,4 @@
+# add a symlink from postgresql.jar to postgresql-jdbc3.jar
+# This maintains compatibility with the previous version of
+# this package
+/usr/share/java/postgresql-jdbc3.jar /usr/share/java/postgresql.jar
