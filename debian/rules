@@ -1,5 +1,12 @@
 #!/usr/bin/make -f
 
+PACKAGE:=libpostgresql-jdbc-java
+POMFILE:=debian/$(PACKAGE).pom
+
+MAJOR_VERSION:=$(shell dpkg-parsechangelog | sed -n -e 's/^Version: *\([^-]\+\)-.*/\1/p')
+VJDBC3:=$(MAJOR_VERSION).jdbc3
+VJDBC4:=$(MAJOR_VERSION).jdbc4
+
 %:
 	dh $@ --with javahelper
 
@@ -13,3 +20,13 @@ override_dh_auto_build:
 	JAVA_HOME=/usr/lib/jvm/default-java ant -Djdbc4=true -Dtarget=1.6 -Dsource=1.6 -Dssl=true jar publicapi
 	mv jars/postgresql.jar postgresql-jdbc4.jar
 
+override_dh_auto_install:
+# install jdbc4 first so that the postgresql.jar symlink points to jdbc3
+	mh_installpom -p$(PACKAGE) -e$(VJDBC4) --no-rules $(POMFILE)
+	mh_installjar -p$(PACKAGE) -e$(VJDBC4) --java-lib --usj-name=postgresql-jdbc4 --usj-version=$(MAJOR_VERSION) $(POMFILE) postgresql-jdbc4.jar
+	mh_installpom -p$(PACKAGE) -e$(VJDBC3) --no-rules $(POMFILE)
+	mh_installjar -p$(PACKAGE) -e$(VJDBC3) --java-lib --usj-name=postgresql-jdbc3 --usj-version=$(MAJOR_VERSION) $(POMFILE) postgresql-jdbc3.jar
+
+override_dh_auto_clean:
+	dh_auto_clean
+	mh_clean
