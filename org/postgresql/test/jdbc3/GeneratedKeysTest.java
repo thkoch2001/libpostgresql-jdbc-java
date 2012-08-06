@@ -3,7 +3,7 @@
 * Copyright (c) 2008, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc3/GeneratedKeysTest.java,v 1.1 2008/11/15 17:48:53 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc3/GeneratedKeysTest.java,v 1.2 2009/01/28 09:50:21 jurka Exp $
 *
 *-------------------------------------------------------------------------
 */

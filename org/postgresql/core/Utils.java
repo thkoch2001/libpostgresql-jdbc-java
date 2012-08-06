@@ -4,7 +4,7 @@
 * Copyright (c) 2004, Open Cloud Limited.
 *
 * IDENTIFICATION
-*        $PostgreSQL: pgjdbc/org/postgresql/core/Utils.java,v 1.7 2008/01/08 06:56:27 jurka Exp $
+*        $PostgreSQL: pgjdbc/org/postgresql/core/Utils.java,v 1.8 2008/09/19 23:44:32 jurka Exp $
 *
 *-------------------------------------------------------------------------
 */

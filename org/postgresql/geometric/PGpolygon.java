@@ -3,7 +3,7 @@
 * Copyright (c) 2003-2008, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/geometric/PGpolygon.java,v 1.12 2007/07/16 15:02:53 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/geometric/PGpolygon.java,v 1.13 2008/01/08 06:56:28 jurka Exp $
 *
 *-------------------------------------------------------------------------
 */

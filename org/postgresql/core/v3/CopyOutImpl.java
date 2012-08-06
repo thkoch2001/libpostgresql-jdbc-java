@@ -3,7 +3,7 @@
 * Copyright (c) 2009, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL$
+*   $PostgreSQL: pgjdbc/org/postgresql/core/v3/CopyOutImpl.java,v 1.1 2009/07/01 05:00:40 jurka Exp $
 *
 *-------------------------------------------------------------------------
 */

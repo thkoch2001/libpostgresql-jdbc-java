@@ -4,7 +4,7 @@
 * Copyright (c) 2004, Open Cloud Limited.
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/core/v3/V3Query.java,v 1.4 2005/01/11 08:25:44 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/core/v3/V3Query.java,v 1.5 2008/01/08 06:56:27 jurka Exp $
 *
 *-------------------------------------------------------------------------
 */

@@ -3,7 +3,7 @@
 * Copyright (c) 2004-2008, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/test/util/BrokenInputStream.java,v 1.4 2005/01/11 08:25:49 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/test/util/BrokenInputStream.java,v 1.5 2008/01/08 06:56:31 jurka Exp $
 *
 *-------------------------------------------------------------------------
 */
