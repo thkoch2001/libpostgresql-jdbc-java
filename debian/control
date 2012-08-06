@@ -7,8 +7,8 @@ Uploaders: Arnaud Vandyck <avdyk@debian.org>, Matthias Klose <doko@ubuntu.com>,
 Build-Depends: debhelper (>= 7.0.50~), java-gcj-compat-dev, ant, javahelper (>=0.32~) 
 Build-Depends-Indep: libxerces2-java, default-jdk, default-jdk-doc
 Standards-Version: 3.9.3
-Vcs-Svn: svn://svn.debian.org/svn/pkg-java/trunk/libpgjava
-Vcs-Browser: http://svn.debian.org/wsvn/pkg-java/trunk/libpgjava
+Vcs-Git: git://anonscm.debian.org/pkg-java/libpostgresql-jdbc-java.git
+Vcs-Browser: http://anonscm.debian.org/git/pkg-java/libpostgresql-jdbc-java.git
 Homepage: http://jdbc.postgresql.org/
 
 Package: libpostgresql-jdbc-java
