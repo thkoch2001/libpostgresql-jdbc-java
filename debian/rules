@@ -15,13 +15,6 @@ override_dh_auto_build:
 	JAVA_HOME=/usr/lib/jvm/default-java ant -Djdbc4=true -Dtarget=1.6 -Dsource=1.6 -Dssl=true jar publicapi
 	mv jars/postgresql.jar postgresql-jdbc4.jar
 
-
-# remove the created jars in our clean
-override_jh_clean:
-	jh_clean
-	rm -f postgresql-jdbc3.jar
-	rm -f postgresql-jdbc4.jar
-
 # add a symlink from postgresql.jar to postgresql-jdbc3.jar
 # This maintains compatibility with the previous version of
 # this package
