@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2004-2008, PostgreSQL Global Development Group
+* Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/jdbc4/AbstractJdbc4ResultSet.java,v 1.6 2008/10/08 18:24:05 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/jdbc4/AbstractJdbc4ResultSet.java,v 1.8 2011/08/02 13:49:23 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -298,6 +298,15 @@ abstract class AbstractJdbc4ResultSet extends org.postgresql.jdbc3g.AbstractJdbc
         return super.internalGetObject(columnIndex, field);
     }
 
+    public <T> T getObject(int columnIndex, Class<T> type) throws SQLException
+    {
+        throw org.postgresql.Driver.notImplemented(this.getClass(), "getObject(int, Class<T>)");
+    }
+
+    public <T> T getObject(String columnLabel, Class<T> type) throws SQLException
+    {
+        return getObject(findColumn(columnLabel), type);
+    }
 
 }
 

@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2004-2008, PostgreSQL Global Development Group
+* Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc2/optional/ConnectionPoolTest.java,v 1.17 2008/01/08 06:56:31 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc2/optional/ConnectionPoolTest.java,v 1.19 2011/08/02 13:50:29 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -44,11 +44,7 @@ public class ConnectionPoolTest extends BaseDataSourceTest
         if (bds == null)
         {
             bds = new ConnectionPool();
-            bds.setServerName(TestUtil.getServer());
-            bds.setPortNumber(TestUtil.getPort());
-            bds.setDatabaseName(TestUtil.getDatabase());
-            bds.setUser(TestUtil.getUser());
-            bds.setPassword(TestUtil.getPassword());
+            setupDataSource(bds);
         }
     }
     

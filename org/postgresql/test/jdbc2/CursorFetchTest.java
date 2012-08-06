@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2004-2008, PostgreSQL Global Development Group
+* Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc2/CursorFetchTest.java,v 1.13 2008/01/08 06:56:30 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc2/CursorFetchTest.java,v 1.15 2011/08/02 13:50:29 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -36,7 +36,9 @@ public class CursorFetchTest extends TestCase
 
     protected void tearDown() throws Exception
     {
-        con.rollback();
+        if (!con.getAutoCommit())
+            con.rollback();
+
         con.setAutoCommit(true);
         TestUtil.dropTable(con, "test_fetch");
         TestUtil.closeDB(con);

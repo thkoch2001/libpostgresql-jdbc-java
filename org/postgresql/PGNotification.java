@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2003-2008, PostgreSQL Global Development Group
+* Copyright (c) 2003-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/PGNotification.java,v 1.12 2008/01/08 06:56:26 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/PGNotification.java,v 1.14 2011/08/02 13:40:12 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -28,8 +28,8 @@ public interface PGNotification
 
     /**
      * Returns additional information from the notifying process.
-     * Currently, this feature is unimplemented and always returns
-     * an empty String.
+     * This feature has only been implemented in server versions 9.0
+     * and later, so previous versions will always return an empty String.
      *
      * @since 8.0
      */

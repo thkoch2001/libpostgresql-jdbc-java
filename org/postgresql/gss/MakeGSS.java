@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2008, PostgreSQL Global Development Group
+* Copyright (c) 2008-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/gss/MakeGSS.java,v 1.2 2008/11/29 07:43:47 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/gss/MakeGSS.java,v 1.5 2011/08/02 14:41:30 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -18,7 +18,6 @@ import java.security.PrivilegedAction;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import com.sun.security.auth.callback.TextCallbackHandler;
 import org.postgresql.core.PGStream;
 import org.postgresql.core.Logger;
 import org.postgresql.util.*;

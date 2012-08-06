@@ -1,16 +1,15 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2003-2008, PostgreSQL Global Development Group
+* Copyright (c) 2003-2011, PostgreSQL Global Development Group
 * Copyright (c) 2004, Open Cloud Limited.
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/core/v2/ConnectionFactoryImpl.java,v 1.18 2009/06/02 00:22:58 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/core/v2/ConnectionFactoryImpl.java,v 1.23 2011/08/02 13:40:12 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
 package org.postgresql.core.v2;
 
-import java.util.Vector;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -92,7 +91,7 @@ public class ConnectionFactoryImpl extends ConnectionFactory {
             readStartupMessages(newStream, protoConnection, logger);
 
             // Run some initial queries
-            runInitialQueries(protoConnection, info.getProperty("charSet"), logger);
+            runInitialQueries(protoConnection, info, logger);
 
             // And we're done.
             return protoConnection;
@@ -102,7 +101,7 @@ public class ConnectionFactoryImpl extends ConnectionFactory {
             // Added by Peter Mount <peter@retep.org.uk>
             // ConnectException is thrown when the connection cannot be made.
             // we trap this an return a more meaningful message for the end user
-            throw new PSQLException (GT.tr("Connection refused. Check that the hostname and port are correct and that the postmaster is accepting TCP/IP connections."), PSQLState.CONNECTION_REJECTED, cex);
+            throw new PSQLException (GT.tr("Connection refused. Check that the hostname and port are correct and that the postmaster is accepting TCP/IP connections."), PSQLState.CONNECTION_UNABLE_TO_CONNECT, cex);
         }
         catch (IOException ioe)
         {
@@ -156,7 +155,7 @@ public class ConnectionFactoryImpl extends ConnectionFactory {
 
             // Server doesn't even know about the SSL handshake protocol
             if (requireSSL)
-                throw new PSQLException(GT.tr("The server does not support SSL."), PSQLState.CONNECTION_FAILURE);
+                throw new PSQLException(GT.tr("The server does not support SSL."), PSQLState.CONNECTION_REJECTED);
 
             // We have to reconnect to continue.
             pgStream.close();
@@ -168,7 +167,7 @@ public class ConnectionFactoryImpl extends ConnectionFactory {
 
             // Server does not support ssl
             if (requireSSL)
-                throw new PSQLException(GT.tr("The server does not support SSL."), PSQLState.CONNECTION_FAILURE);
+                throw new PSQLException(GT.tr("The server does not support SSL."), PSQLState.CONNECTION_REJECTED);
 
             return pgStream;
 
@@ -181,7 +180,7 @@ public class ConnectionFactoryImpl extends ConnectionFactory {
             return pgStream;
 
         default:
-            throw new PSQLException(GT.tr("An error occured while setting up the SSL connection."), PSQLState.CONNECTION_FAILURE);
+            throw new PSQLException(GT.tr("An error occured while setting up the SSL connection."), PSQLState.PROTOCOL_VIOLATION);
         }
     }
 
@@ -320,7 +319,7 @@ public class ConnectionFactoryImpl extends ConnectionFactory {
                 break;
 
             default:
-                throw new PSQLException(GT.tr("Protocol error.  Session setup failed."), PSQLState.CONNECTION_UNABLE_TO_CONNECT);
+                throw new PSQLException(GT.tr("Protocol error.  Session setup failed."), PSQLState.PROTOCOL_VIOLATION);
             }
         }
     }
@@ -358,80 +357,13 @@ public class ConnectionFactoryImpl extends ConnectionFactory {
                 break;
 
             default:
-                throw new PSQLException(GT.tr("Protocol error.  Session setup failed."), PSQLState.CONNECTION_UNABLE_TO_CONNECT);
+                throw new PSQLException(GT.tr("Protocol error.  Session setup failed."), PSQLState.PROTOCOL_VIOLATION);
             }
         }
     }
 
-    private static class SimpleResultHandler implements ResultHandler {
-        private SQLException error;
-        private Vector tuples;
-        private final ProtocolConnectionImpl protoConnection;
-
-        SimpleResultHandler(ProtocolConnectionImpl protoConnection) {
-            this.protoConnection = protoConnection;
-        }
-
-        Vector getResults() {
-            return tuples;
-        }
-
-        public void handleResultRows(Query fromQuery, Field[] fields, Vector tuples, ResultCursor cursor) {
-            this.tuples = tuples;
-        }
-
-        public void handleCommandStatus(String status, int updateCount, long insertOID) {
-        }
-
-        public void handleWarning(SQLWarning warning) {
-            protoConnection.addWarning(warning);
-        }
-
-        public void handleError(SQLException newError) {
-            if (error == null)
-                error = newError;
-            else
-                error.setNextException(newError);
-        }
-
-        public void handleCompletion() throws SQLException {
-            if (error != null)
-                throw error;
-        }
-    }
-
-    // Poor man's Statement & ResultSet, used for initial queries while we're
-    // still initializing the system.
-    private byte[][] runSetupQuery(ProtocolConnectionImpl protoConnection, String queryString, boolean wantResults) throws SQLException {
-        QueryExecutor executor = protoConnection.getQueryExecutor();
-        Query query = executor.createSimpleQuery(queryString);
-        SimpleResultHandler handler = new SimpleResultHandler(protoConnection);
-
-        int flags = QueryExecutor.QUERY_ONESHOT | QueryExecutor.QUERY_SUPPRESS_BEGIN;
-        if (!wantResults)
-            flags |= QueryExecutor.QUERY_NO_RESULTS | QueryExecutor.QUERY_NO_METADATA;
-
-        try
-        {
-            executor.execute(query, null, handler, 0, 0, flags);
-        }
-        finally
-        {
-            query.close();
-        }
-
-        if (!wantResults)
-            return null;
-
-        Vector tuples = handler.getResults();
-        if (tuples == null || tuples.size() != 1)
-            throw new PSQLException(GT.tr("An unexpected result was returned by a query."), PSQLState.CONNECTION_UNABLE_TO_CONNECT);
-
-        return (byte[][]) tuples.elementAt(0);
-    }
-
-    private void runInitialQueries(ProtocolConnectionImpl protoConnection, String charSet, Logger logger) throws SQLException, IOException {
-        byte[][] results = runSetupQuery(protoConnection, "set datestyle = 'ISO'; select version(), case when pg_encoding_to_char(1) = 'SQL_ASCII' then 'UNKNOWN' else getdatabaseencoding() end", true);
+    private void runInitialQueries(ProtocolConnectionImpl protoConnection, Properties info, Logger logger) throws SQLException, IOException {
+        byte[][] results = SetupQueryRunner.run(protoConnection, "set datestyle = 'ISO'; select version(), case when pg_encoding_to_char(1) = 'SQL_ASCII' then 'UNKNOWN' else getdatabaseencoding() end", true);
 
         String rawDbVersion = protoConnection.getEncoding().decode(results[0]);
         StringTokenizer versionParts = new StringTokenizer(rawDbVersion);
@@ -448,19 +380,22 @@ public class ConnectionFactoryImpl extends ConnectionFactory {
             // 7.3 server that defaults to autocommit = off.
 
             if (logger.logDebug())
-                logger.debug("Switching to UNICODE client_encoding");
+                logger.debug("Switching to UTF8 client_encoding");
 
-            String sql = "begin; set autocommit = on; set client_encoding = 'UNICODE'; ";
-            if (dbVersion.compareTo("7.4") >= 0) {
+            String sql = "begin; set autocommit = on; set client_encoding = 'UTF8'; ";
+            if (dbVersion.compareTo("9.0") >= 0) {
+                sql += "SET extra_float_digits=3; ";
+            } else if (dbVersion.compareTo("7.4") >= 0) {
                 sql += "SET extra_float_digits=2; ";
             }
             sql += "commit";
 
-            runSetupQuery(protoConnection, sql, false);
-            protoConnection.setEncoding(Encoding.getDatabaseEncoding("UNICODE"));
+            SetupQueryRunner.run(protoConnection, sql, false);
+            protoConnection.setEncoding(Encoding.getDatabaseEncoding("UTF8"));
         }
         else
         {
+            String charSet = info.getProperty("charSet");
             String dbEncoding = (results[1] == null ? null : protoConnection.getEncoding().decode(results[1]));
             if (logger.logDebug())
             {
@@ -492,13 +427,22 @@ public class ConnectionFactoryImpl extends ConnectionFactory {
         if (dbVersion.compareTo("8.1") >= 0)
         {
             // Server versions since 8.1 report standard_conforming_strings
-            results = runSetupQuery(protoConnection, "select current_setting('standard_conforming_strings')", true);
+            results = SetupQueryRunner.run(protoConnection, "select current_setting('standard_conforming_strings')", true);
             String value = protoConnection.getEncoding().decode(results[0]);
             protoConnection.setStandardConformingStrings(value.equalsIgnoreCase("on"));
         }
         else
         {
             protoConnection.setStandardConformingStrings(false);
+        }
+
+        String appName = info.getProperty("ApplicationName");
+        if (appName != null && dbVersion.compareTo("9.0") >= 0)
+        {
+            StringBuffer sb = new StringBuffer("SET application_name = '");
+            Utils.appendEscapedLiteral(sb, appName, protoConnection.getStandardConformingStrings());
+            sb.append("'");
+            SetupQueryRunner.run(protoConnection, sb.toString(), false);
         }
     }
 }

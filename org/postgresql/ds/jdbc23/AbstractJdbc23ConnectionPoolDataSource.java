@@ -1,15 +1,14 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2004-2008, PostgreSQL Global Development Group
+* Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/ds/PGConnectionPoolDataSource.java,v 1.5 2008/01/08 06:56:27 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/ds/jdbc23/AbstractJdbc23ConnectionPoolDataSource.java,v 1.2 2011/08/02 13:42:25 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
-package org.postgresql.ds;
+package org.postgresql.ds.jdbc23;
 
-import javax.sql.ConnectionPoolDataSource;
 import javax.sql.PooledConnection;
 import java.sql.SQLException;
 import java.io.Serializable;
@@ -18,6 +17,7 @@ import java.io.ObjectInputStream;
 import java.io.IOException;
 
 import org.postgresql.ds.common.*;
+import org.postgresql.ds.PGPooledConnection;
 
 /**
  * PostgreSQL implementation of ConnectionPoolDataSource.  The app server or
@@ -36,7 +36,7 @@ import org.postgresql.ds.common.*;
  *
  * @author Aaron Mulder (ammulder@chariotsolutions.com)
  */
-public class PGConnectionPoolDataSource extends BaseDataSource implements Serializable, ConnectionPoolDataSource
+public class AbstractJdbc23ConnectionPoolDataSource extends BaseDataSource implements Serializable
 {
     private boolean defaultAutoCommit = true;
 
@@ -103,4 +103,5 @@ public class PGConnectionPoolDataSource extends BaseDataSource implements Serial
         readBaseObject(in);
         defaultAutoCommit = in.readBoolean();
     }
+
 }

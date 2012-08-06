@@ -1,10 +1,10 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2004-2008, PostgreSQL Global Development Group
+* Copyright (c) 2004-2011, PostgreSQL Global Development Group
 * Copyright (c) 2004, Open Cloud Limited.
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/core/v3/SimpleParameterList.java,v 1.17 2008/09/30 23:41:23 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/core/v3/SimpleParameterList.java,v 1.20 2011/08/02 13:40:12 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -155,12 +155,16 @@ class SimpleParameterList implements V3ParameterList {
 
             p.append('\'');
             try {
-                p = Utils.appendEscapedLiteral(p, paramValues[index].toString(), protoConnection.getStandardConformingStrings());
+                p = Utils.appendEscapedLiteral(p, param, standardConformingStrings);
             } catch (SQLException sqle) {
                 // This should only happen if we have an embedded null
                 // and there's not much we can do if we do hit one.
                 //
-                throw new IllegalArgumentException(sqle.toString());
+                // The goal of toString isn't to be sent to the server,
+                // so we aren't 100% accurate (see StreamWrapper), put
+                // the unescaped version of the data.
+                //
+                p.append(param);
             }
             p.append('\'');
             return p.toString();

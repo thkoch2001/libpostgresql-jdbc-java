@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2004-2008, PostgreSQL Global Development Group
+* Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/jdbc4/AbstractJdbc4DatabaseMetaData.java,v 1.7 2008/01/08 06:56:30 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/jdbc4/AbstractJdbc4DatabaseMetaData.java,v 1.12 2011/08/02 13:49:23 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -29,7 +29,7 @@ public abstract class AbstractJdbc4DatabaseMetaData extends org.postgresql.jdbc3
 
     public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException
     {
-        throw org.postgresql.Driver.notImplemented(this.getClass(), "getSchemas(String, String)");
+        return getSchemas(4, catalog, schemaPattern);
     }
 
     public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException
@@ -51,7 +51,16 @@ public abstract class AbstractJdbc4DatabaseMetaData extends org.postgresql.jdbc3
         f[3] = new Field("DESCRIPTION", Oid.VARCHAR);
 
         Vector v = new Vector();
-        // Currently we don't support any properties.
+
+        if (connection.haveMinimumServerVersion("9.0")) {
+            byte[][] tuple = new byte[4][];
+            tuple[0] = connection.encodeString("ApplicationName");
+            tuple[1] = connection.encodeString(Integer.toString(getMaxNameLength()));
+            tuple[2] = connection.encodeString("");
+            tuple[3] = connection.encodeString("The name of the application currently utilizing the connection.");
+            v.addElement(tuple);
+        }
+
         return (ResultSet) ((BaseStatement)createMetaDataStatement()).createDriverResultSet(f, v);
     }
 
@@ -88,6 +97,25 @@ public abstract class AbstractJdbc4DatabaseMetaData extends org.postgresql.jdbc3
     public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException
     {
         return getColumns(4, catalog, schemaPattern, tableNamePattern, columnNamePattern);
+    }
+
+    public ResultSet getProcedures(String catalog, String schemaPattern, String procedureNamePattern) throws SQLException
+    {
+        return getProcedures(4, catalog, schemaPattern, procedureNamePattern);
+    }
+
+    public ResultSet getProcedureColumns(String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern) throws SQLException
+    {
+        return getProcedureColumns(4, catalog, schemaPattern, procedureNamePattern, columnNamePattern);
+    }
+
+    public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException
+    {
+        throw org.postgresql.Driver.notImplemented(this.getClass(), "getPseudoColumns(String, String, String, String)");
+    }
+
+    public boolean generatedKeyAlwaysReturned() throws SQLException {
+        return true;
     }
 
 }

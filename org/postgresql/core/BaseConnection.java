@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2003-2008, PostgreSQL Global Development Group
+* Copyright (c) 2003-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/core/BaseConnection.java,v 1.22 2008/04/15 04:23:54 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/core/BaseConnection.java,v 1.25 2011/08/02 13:40:12 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -96,7 +96,7 @@ public interface BaseConnection extends PGConnection, Connection
 
     /**
      * Encode a string using the database's client_encoding
-     * (usually UNICODE, but can vary on older server versions).
+     * (usually UTF8, but can vary on older server versions).
      * This is used when constructing synthetic resultsets (for
      * example, in metadata methods).
      *
@@ -139,4 +139,11 @@ public interface BaseConnection extends PGConnection, Connection
 
     // Get the bind-string-as-varchar config flag
     public boolean getStringVarcharFlag();
+
+    /**
+     * Get the current transaction state of this connection.
+     * 
+     * @return a ProtocolConnection.TRANSACTION_* constant.
+     */
+    public int getTransactionState();
 }

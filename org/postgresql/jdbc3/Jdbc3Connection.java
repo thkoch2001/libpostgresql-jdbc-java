@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2004-2008, PostgreSQL Global Development Group
+* Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/jdbc3/Jdbc3Connection.java,v 1.12 2008/01/08 06:56:29 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/jdbc3/Jdbc3Connection.java,v 1.14 2011/08/02 13:49:01 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -26,6 +26,7 @@ public class Jdbc3Connection extends org.postgresql.jdbc3.AbstractJdbc3Connectio
 
     public java.sql.Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException
     {
+        checkClosed();
         Jdbc3Statement s = new Jdbc3Statement(this, resultSetType, resultSetConcurrency, resultSetHoldability);
         s.setPrepareThreshold(getPrepareThreshold());
         return s;
@@ -34,6 +35,7 @@ public class Jdbc3Connection extends org.postgresql.jdbc3.AbstractJdbc3Connectio
 
     public java.sql.PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException
     {
+        checkClosed();
         Jdbc3PreparedStatement s = new Jdbc3PreparedStatement(this, sql, resultSetType, resultSetConcurrency, resultSetHoldability);
         s.setPrepareThreshold(getPrepareThreshold());
         return s;
@@ -41,6 +43,7 @@ public class Jdbc3Connection extends org.postgresql.jdbc3.AbstractJdbc3Connectio
 
     public java.sql.CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException
     {
+        checkClosed();
         Jdbc3CallableStatement s = new Jdbc3CallableStatement(this, sql, resultSetType, resultSetConcurrency, resultSetHoldability);
         s.setPrepareThreshold(getPrepareThreshold());
         return s;
@@ -48,6 +51,7 @@ public class Jdbc3Connection extends org.postgresql.jdbc3.AbstractJdbc3Connectio
 
     public java.sql.DatabaseMetaData getMetaData() throws SQLException
     {
+        checkClosed();
         if (metadata == null)
             metadata = new Jdbc3DatabaseMetaData(this);
         return metadata;

@@ -1,10 +1,10 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2003-2008, PostgreSQL Global Development Group
+* Copyright (c) 2003-2011, PostgreSQL Global Development Group
 * Copyright (c) 2004, Open Cloud Limited.
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/core/v3/QueryExecutorImpl.java,v 1.45 2009/07/01 05:00:40 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/core/v3/QueryExecutorImpl.java,v 1.54 2011/08/02 13:40:12 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -472,11 +472,28 @@ public class QueryExecutorImpl implements QueryExecutor {
     public synchronized byte[]
     fastpathCall(int fnid, ParameterList parameters, boolean suppressBegin) throws SQLException {
         waitOnLock();
-        if (protoConnection.getTransactionState() == ProtocolConnection.TRANSACTION_IDLE && !suppressBegin)
+        if (!suppressBegin)
+        {
+            doSubprotocolBegin();
+        }
+        try
+        {
+            sendFastpathCall(fnid, (SimpleParameterList)parameters);
+            return receiveFastpathResult();
+        }
+        catch (IOException ioe)
+        {
+            protoConnection.close();
+            throw new PSQLException(GT.tr("An I/O error occured while sending to the backend."), PSQLState.CONNECTION_FAILURE, ioe);
+        }
+    }
+
+    public void doSubprotocolBegin() throws SQLException {
+        if (protoConnection.getTransactionState() == ProtocolConnection.TRANSACTION_IDLE)
         {
 
             if (logger.logDebug())
-                logger.debug("Issuing BEGIN before fastpath call.");
+                logger.debug("Issuing BEGIN before fastpath or copy call.");
 
             ResultHandler handler = new ResultHandler() {
                                         private boolean sawBegin = false;
@@ -537,16 +554,6 @@ public class QueryExecutorImpl implements QueryExecutor {
             }
         }
 
-        try
-        {
-            sendFastpathCall(fnid, (SimpleParameterList)parameters);
-            return receiveFastpathResult();
-        }
-        catch (IOException ioe)
-        {
-            protoConnection.close();
-            throw new PSQLException(GT.tr("An I/O error occured while sending to the backend."), PSQLState.CONNECTION_FAILURE, ioe);
-        }
     }
 
     public ParameterList createFastpathParameters(int count) {
@@ -699,11 +706,17 @@ public class QueryExecutorImpl implements QueryExecutor {
      * @return CopyIn or CopyOut operation object
      * @throws SQLException on failure
      */
-    public synchronized CopyOperation startCopy(String sql) throws SQLException {
+    public synchronized CopyOperation startCopy(String sql, boolean suppressBegin) throws SQLException {
         waitOnLock();
+        if (!suppressBegin) {
+            doSubprotocolBegin();
+        }
         byte buf[] = Utils.encodeUTF8(sql);
 
         try {
+            if (logger.logDebug())
+                logger.debug(" FE=> Query(CopyStart)");
+
             pgStream.SendChar('Q');
             pgStream.SendInteger4(buf.length + 4 + 1);
             pgStream.Send(buf);
@@ -803,6 +816,9 @@ public class QueryExecutorImpl implements QueryExecutor {
                 throw new PSQLException(GT.tr("Tried to end inactive copy"), PSQLState.OBJECT_NOT_IN_STATE);
 
         try {
+            if (logger.logDebug())
+                logger.debug(" FE=> CopyDone");
+
             pgStream.SendChar('c'); // CopyDone
             pgStream.SendInteger4(4);
             pgStream.flush();
@@ -828,7 +844,7 @@ public class QueryExecutorImpl implements QueryExecutor {
             throw new PSQLException(GT.tr("Tried to write to an inactive copy operation"), PSQLState.OBJECT_NOT_IN_STATE);
 
         if (logger.logDebug())
-            logger.debug(" FE=> CopyData(" + (siz-off) + ")");
+            logger.debug(" FE=> CopyData(" + siz + ")");
 
         try {
             pgStream.SendChar('d');
@@ -890,6 +906,25 @@ public class QueryExecutorImpl implements QueryExecutor {
         int len;
 
         while( !endReceiving && (block || pgStream.hasMessagePending()) ) {
+
+            // There is a bug in the server's implementation of the copy
+            // protocol.  It returns command complete immediately upon
+            // receiving the EOF marker in the binary protocol,
+            // potentially before we've issued CopyDone.  When we are not
+            // blocking, we don't think we are done, so we hold off on
+            // processing command complete and any subsequent messages
+            // until we actually are done with the copy.
+            //
+            if (!block) {
+                int c = pgStream.PeekChar();
+                if (c == 'C') // CommandComplete
+                {
+                    if (logger.logDebug())
+                        logger.debug(" <=BE CommandStatus, Ignored until CopyDone");
+                    break;
+                }
+            }
+
             int c = pgStream.ReceiveChar();
             switch(c) {
 
@@ -970,7 +1005,7 @@ public class QueryExecutorImpl implements QueryExecutor {
                     error = new PSQLException(GT.tr("Got CopyData without an active copy operation"), PSQLState.OBJECT_NOT_IN_STATE);
                 } else if (!(op instanceof CopyOutImpl)) {
                     error = new PSQLException(GT.tr("Unexpected copydata from server for {0}",
-                            op == null ? "null" : op.getClass().getName()), PSQLState.COMMUNICATION_ERROR);
+                            op.getClass().getName()), PSQLState.COMMUNICATION_ERROR);
                 } else {
                     ((CopyOutImpl)op).handleCopydata(buf);
                 }
@@ -1045,11 +1080,12 @@ public class QueryExecutorImpl implements QueryExecutor {
         // Now the query itself.
         SimpleQuery[] subqueries = query.getSubqueries();
         SimpleParameterList[] subparams = parameters.getSubparams();
+        boolean disallowBatching = (flags & QueryExecutor.QUERY_DISALLOW_BATCHING) != 0;
 
         if (subqueries == null)
         {
             ++queryCount;
-            if (queryCount >= MAX_BUFFERED_QUERIES)
+            if (disallowBatching || queryCount >= MAX_BUFFERED_QUERIES)
             {
                 sendSync();
                 processResults(trackingHandler, flags);
@@ -1066,7 +1102,7 @@ public class QueryExecutorImpl implements QueryExecutor {
             for (int i = 0; i < subqueries.length; ++i)
             {
                 ++queryCount;
-                if (queryCount >= MAX_BUFFERED_QUERIES)
+                if (disallowBatching || queryCount >= MAX_BUFFERED_QUERIES)
                 {
                     sendSync();
                     processResults(trackingHandler, flags);
@@ -1482,10 +1518,15 @@ public class QueryExecutorImpl implements QueryExecutor {
 
         if (!describeStatement && paramsHasUnknown && !queryHasUnknown)
         {
-            int numParams = params.getParameterCount();
             int queryOIDs[] = query.getStatementTypes();
-            for (int i=1; i<=numParams; i++) {
-                params.setResolvedType(i, queryOIDs[i-1]);
+            int paramOIDs[] = params.getTypeOIDs();
+            for (int i=0; i<paramOIDs.length; i++) {
+                // Only supply type information when there isn't any
+                // already, don't arbitrarily overwrite user supplied
+                // type information.
+                if (paramOIDs[i] == Oid.UNSPECIFIED) {
+                    params.setResolvedType(i+1, queryOIDs[i]);
+                }
             }
         }
 
@@ -1828,10 +1869,10 @@ public class QueryExecutorImpl implements QueryExecutor {
                     if (logger.logDebug())
                         logger.debug(" <=BE ParameterStatus(" + name + " = " + value + ")");
 
-                    if (name.equals("client_encoding") && !(value.equalsIgnoreCase("UNICODE") || value.equalsIgnoreCase("UTF8")) && !allowEncodingChanges)
+                    if (name.equals("client_encoding") && !value.equalsIgnoreCase("UTF8") && !allowEncodingChanges)
                     {
                         protoConnection.close(); // we're screwed now; we can't trust any subsequent string.
-                        handler.handleError(new PSQLException(GT.tr("The server''s client_encoding parameter was changed to {0}. The JDBC driver requires client_encoding to be UNICODE for correct operation.", value), PSQLState.CONNECTION_FAILURE));
+                        handler.handleError(new PSQLException(GT.tr("The server''s client_encoding parameter was changed to {0}. The JDBC driver requires client_encoding to be UTF8 for correct operation.", value), PSQLState.CONNECTION_FAILURE));
                         endQuery = true;
                     }
 
@@ -2027,7 +2068,7 @@ public class QueryExecutorImpl implements QueryExecutor {
             int typeModifier = pgStream.ReceiveInteger4();
             int formatType = pgStream.ReceiveInteger2();
             fields[i] = new Field(columnLabel,
-                                  null,  /* name not yet determined */
+                                  "",  /* name not yet determined */
                                   typeOid, typeLength, typeModifier, tableOid, positionInTable);
             fields[i].setFormat(formatType);
         }

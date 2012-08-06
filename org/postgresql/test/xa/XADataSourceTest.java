@@ -1,3 +1,12 @@
+/*-------------------------------------------------------------------------
+*
+* Copyright (c) 2009-2011, PostgreSQL Global Development Group
+*
+* IDENTIFICATION
+*   $PostgreSQL: pgjdbc/org/postgresql/test/xa/XADataSourceTest.java,v 1.13 2011/08/02 20:26:00 davecramer Exp $
+*
+*-------------------------------------------------------------------------
+*/
 package org.postgresql.test.xa;
 
 import java.sql.Connection;
@@ -15,6 +24,7 @@ import javax.transaction.xa.Xid;
 
 
 import org.postgresql.test.TestUtil;
+import org.postgresql.test.jdbc2.optional.BaseDataSourceTest;
 import org.postgresql.xa.PGXADataSource;
 
 import junit.framework.TestCase;
@@ -33,12 +43,7 @@ public class XADataSourceTest extends TestCase {
         super(name);
 
         _ds = new PGXADataSource();
-        ((PGXADataSource)_ds).setServerName(TestUtil.getServer());
-        ((PGXADataSource)_ds).setPortNumber(TestUtil.getPort());
-        ((PGXADataSource)_ds).setUser(TestUtil.getUser());
-        ((PGXADataSource)_ds).setPassword(TestUtil.getPassword());
-        ((PGXADataSource)_ds).setDatabaseName(TestUtil.getDatabase());
-        ((PGXADataSource)_ds).setPrepareThreshold(TestUtil.getPrepareThreshold());
+        BaseDataSourceTest.setupDataSource((PGXADataSource)_ds);
     }
 
     protected void setUp() throws Exception {
@@ -306,6 +311,18 @@ public class XADataSourceTest extends TestCase {
         xaRes.end(xid, XAResource.TMSUCCESS);
         xaRes.commit(xid, true);
     }
+
+    public void testRestoreOfAutoCommit() throws Exception {
+        conn.setAutoCommit(false);
+
+        Xid xid = new CustomXid(14);
+        xaRes.start(xid, XAResource.TMNOFLAGS);
+        xaRes.end(xid, XAResource.TMSUCCESS);
+        xaRes.commit(xid, true);
+
+        assertTrue(!conn.getAutoCommit());
+    }
+
 
     /* We don't support transaction interleaving.
     public void testInterleaving1() throws Exception {

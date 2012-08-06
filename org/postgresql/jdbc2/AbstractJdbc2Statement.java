@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2004-2008, PostgreSQL Global Development Group
+* Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/jdbc2/AbstractJdbc2Statement.java,v 1.114 2009/05/27 23:55:19 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/jdbc2/AbstractJdbc2Statement.java,v 1.122 2011/08/02 13:48:35 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -59,6 +59,8 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
 
     /** The warnings chain. */
     protected SQLWarning warnings = null;
+    /** The last warning of the warning chain. */
+    protected SQLWarning lastWarning = null;
 
     /** Maximum number of rows to return, 0 = unlimited */
     protected int maxrows = 0;
@@ -296,9 +298,19 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
             executeWithFlags(p_sql, 0);                
             return 0;
         }
-        if (executeWithFlags(p_sql, QueryExecutor.QUERY_NO_RESULTS))
-            throw new PSQLException(GT.tr("A result was returned when none was expected."),
+
+        executeWithFlags(p_sql, QueryExecutor.QUERY_NO_RESULTS);
+
+        ResultWrapper iter = result;
+        while (iter != null) {
+            if (iter.getResultSet() != null) {
+                throw new PSQLException(GT.tr("A result was returned when none was expected."),
                     				  PSQLState.TOO_MANY_RESULTS);
+
+            }
+            iter = iter.getNext();
+        }
+
         return getUpdateCount();
     }
 
@@ -318,9 +330,18 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
             executeWithFlags(0);
             return 0;
         }
-        if (executeWithFlags(QueryExecutor.QUERY_NO_RESULTS))
-            throw new PSQLException(GT.tr("A result was returned when none was expected."),
-                                    PSQLState.TOO_MANY_RESULTS);
+
+        executeWithFlags(QueryExecutor.QUERY_NO_RESULTS);
+
+        ResultWrapper iter = result;
+        while (iter != null) {
+            if (iter.getResultSet() != null) {
+                throw new PSQLException(GT.tr("A result was returned when none was expected."),
+                    				  PSQLState.TOO_MANY_RESULTS);
+
+            }
+            iter = iter.getNext();
+        }
 
         return getUpdateCount();
     }
@@ -431,7 +452,7 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
         return (result != null && result.getResultSet() != null);
     }
 
-    protected void execute(Query queryToExecute, ParameterList queryParameters, int flags) throws SQLException {
+    protected void closeForNextExecution() throws SQLException {
         // Every statement execution clears any previous warnings.
         clearWarnings();
 
@@ -442,11 +463,23 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
                 firstUnclosedResult.getResultSet().close();
             firstUnclosedResult = firstUnclosedResult.getNext();
         }
+        result = null;
 
         if (lastSimpleQuery != null) {
             lastSimpleQuery.close();
             lastSimpleQuery = null;
         }
+
+        if (generatedKeys != null) {
+            if (generatedKeys.getResultSet() != null) {
+                generatedKeys.getResultSet().close();
+            }
+            generatedKeys = null;
+        }
+    }
+
+    protected void execute(Query queryToExecute, ParameterList queryParameters, int flags) throws SQLException {
+        closeForNextExecution();
 
         // Enable cursor-based resultset if possible.
         if (fetchSize > 0 && !wantsScrollableResultSet() && !connection.getAutoCommit() && !wantsHoldableResultSet())
@@ -638,15 +671,22 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
     }
 
     /**
-     * This adds a warning to the warning chain.
+     * This adds a warning to the warning chain.  We track the
+     * tail of the warning chain as well to avoid O(N) behavior
+     * for adding a new warning to an existing chain.  Some
+     * server functions which RAISE NOTICE (or equivalent) produce
+     * a ton of warnings.
      * @param warn warning to add
      */
     public void addWarning(SQLWarning warn)
     {
-        if (warnings != null)
-            warnings.setNextWarning(warn);
-        else
+        if (warnings == null) {
             warnings = warn;
+            lastWarning = warn;
+        } else {
+            lastWarning.setNextWarning(warn);
+            lastWarning = warn;
+        }
     }
 
     /*
@@ -710,6 +750,7 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
     public void clearWarnings() throws SQLException
     {
         warnings = null;
+        lastWarning = null;
     }
 
     /*
@@ -747,22 +788,11 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
         if (isClosed)
             return ;
 
-        // Force the ResultSet(s) to close
-        while (firstUnclosedResult != null)
-        {
-            if (firstUnclosedResult.getResultSet() != null)
-                firstUnclosedResult.getResultSet().close();
-            firstUnclosedResult = firstUnclosedResult.getNext();
-        }
-
-        if (lastSimpleQuery != null)
-            lastSimpleQuery.close();
+        closeForNextExecution();
 
         if (preparedQuery != null)
             preparedQuery.close();
 
-        // Disasociate it from us
-        result = firstUnclosedResult = null;
         isClosed = true;
     }
 
@@ -1090,10 +1120,8 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
             oid = Oid.DATE;
             break;
         case Types.TIME:
-            oid = Oid.TIME;
-            break;
         case Types.TIMESTAMP:
-            oid = Oid.TIMESTAMPTZ;
+            oid = Oid.UNSPECIFIED;
             break;
         case Types.BIT:
             oid = Oid.BOOL;
@@ -1708,6 +1736,9 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
                 else
                     throw new PSQLException(GT.tr("Cannot cast an instance of {0} to type {1}", new Object[]{in.getClass().getName(),"Types.ARRAY"}), PSQLState.INVALID_PARAMETER_TYPE);
                 break;
+            case Types.DISTINCT:
+                bindString(parameterIndex, in.toString(), Oid.UNSPECIFIED);
+                break;
 	        case Types.OTHER:
 	            if (in instanceof PGobject)
 	                setPGobject(parameterIndex, (PGobject)in);
@@ -1766,6 +1797,8 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
             setArray(parameterIndex, (Array)x);
         else if (x instanceof PGobject)
             setPGobject(parameterIndex, (PGobject)x);
+        else if (x instanceof Character)
+            setString(parameterIndex, ((Character)x).toString());
         else
         {
             // Can't infer a type.
@@ -2522,16 +2555,35 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
         private final Query[] queries;
         private final ParameterList[] parameterLists;
         private final int[] updateCounts;
+        private final boolean expectGeneratedKeys;
+        private ResultSet generatedKeys;
 
-        BatchResultHandler(Query[] queries, ParameterList[] parameterLists, int[] updateCounts) {
+        BatchResultHandler(Query[] queries, ParameterList[] parameterLists, int[] updateCounts, boolean expectGeneratedKeys) {
             this.queries = queries;
             this.parameterLists = parameterLists;
             this.updateCounts = updateCounts;
+            this.expectGeneratedKeys = expectGeneratedKeys;
         }
 
         public void handleResultRows(Query fromQuery, Field[] fields, Vector tuples, ResultCursor cursor) {
-            handleError(new PSQLException(GT.tr("A result was returned when none was expected."),
+            if (!expectGeneratedKeys) {
+                handleError(new PSQLException(GT.tr("A result was returned when none was expected."),
                                           PSQLState.TOO_MANY_RESULTS));
+            } else {
+                if (generatedKeys == null) {
+                    try
+                    {
+                        generatedKeys = AbstractJdbc2Statement.this.createResultSet(fromQuery, fields, tuples, cursor);
+                    }
+                    catch (SQLException e)
+                    {
+                        handleError(e);
+            
+                    }
+                } else {
+                    ((AbstractJdbc2ResultSet)generatedKeys).addRows(tuples);
+                }
+            }
         }
 
         public void handleCommandStatus(String status, int updateCount, long insertOID) {
@@ -2579,6 +2631,10 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
         public void handleCompletion() throws SQLException {
             if (batchException != null)
                 throw batchException;
+        }
+
+        public ResultSet getGeneratedKeys() {
+            return generatedKeys;
         }
     }
     private class CallableBatchResultHandler implements ResultHandler {
@@ -2653,8 +2709,7 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
     {
         checkClosed();
 
-        // Every statement execution clears any previous warnings.
-        clearWarnings();
+        closeForNextExecution();
 
         if (batchStatements == null || batchStatements.isEmpty())
             return new int[0];
@@ -2668,22 +2723,13 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
         batchStatements.clear();
         batchParameters.clear();
 
-        // Close any existing resultsets associated with this statement.
-        while (firstUnclosedResult != null)
-        {
-            if (firstUnclosedResult.getResultSet() != null)
-            {
-                firstUnclosedResult.getResultSet().close();
-            }
-            firstUnclosedResult = firstUnclosedResult.getNext();
-        }
+        int flags;
 
-        if (lastSimpleQuery != null) {
-            lastSimpleQuery.close();
-            lastSimpleQuery = null;
+        if (wantsGeneratedKeysAlways) {
+            flags = QueryExecutor.QUERY_BOTH_ROWS_AND_STATUS | QueryExecutor.QUERY_DISALLOW_BATCHING;
+        } else {
+            flags = QueryExecutor.QUERY_NO_RESULTS;
         }
-
-        int flags = QueryExecutor.QUERY_NO_RESULTS;
 
         // Only use named statements after we hit the threshold
         if (preparedQuery != null)
@@ -2702,7 +2748,7 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
 	if (isFunction) {
 		handler = new CallableBatchResultHandler(queries, parameterLists, updateCounts );
 	} else {
-		handler = new BatchResultHandler(queries, parameterLists, updateCounts);
+		handler = new BatchResultHandler(queries, parameterLists, updateCounts, wantsGeneratedKeysAlways);
 	}
         
         connection.getQueryExecutor().execute(queries,
@@ -2712,6 +2758,10 @@ public abstract class AbstractJdbc2Statement implements BaseStatement
                                               fetchSize,
                                               flags);
 
+        if (wantsGeneratedKeysAlways) {
+            generatedKeys = new ResultWrapper(((BatchResultHandler)handler).getGeneratedKeys());
+        }
+            
         return updateCounts;
     }
 

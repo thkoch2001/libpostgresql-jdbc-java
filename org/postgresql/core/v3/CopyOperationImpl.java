@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2009, PostgreSQL Global Development Group
+* Copyright (c) 2009-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/core/v3/CopyOperationImpl.java,v 1.1 2009/07/01 05:00:40 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/core/v3/CopyOperationImpl.java,v 1.4 2011/08/19 21:50:39 jurka Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -17,7 +17,6 @@ import org.postgresql.util.PSQLException;
 import org.postgresql.util.PSQLState;
 
 public class CopyOperationImpl implements CopyOperation {
-    String sql;
     QueryExecutorImpl queryExecutor;
     int rowFormat;
     int[] fieldFormats;

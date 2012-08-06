@@ -1,4 +1,13 @@
-package org.postgresql.xa;
+/*-------------------------------------------------------------------------
+*
+* Copyright (c) 2009-2011, PostgreSQL Global Development Group
+*
+* IDENTIFICATION
+*   $PostgreSQL: pgjdbc/org/postgresql/xa/jdbc3/AbstractJdbc3XADataSource.java,v 1.2 2011/08/02 20:26:01 davecramer Exp $
+*
+*-------------------------------------------------------------------------
+*/
+package org.postgresql.xa.jdbc3;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -6,7 +15,8 @@ import java.sql.SQLException;
 import javax.naming.Referenceable;
 import javax.naming.Reference;
 import javax.sql.XAConnection;
-import javax.sql.XADataSource;
+
+import org.postgresql.xa.*;
 
 import org.postgresql.core.BaseConnection;
 import org.postgresql.ds.common.BaseDataSource;
@@ -16,7 +26,7 @@ import org.postgresql.ds.common.BaseDataSource;
  *
  * @author Heikki Linnakangas (heikki.linnakangas@iki.fi)
  */
-public class PGXADataSource extends BaseDataSource implements Referenceable, XADataSource
+public class AbstractJdbc3XADataSource extends BaseDataSource implements Referenceable
 {
     /**
      * Gets a connection to the PostgreSQL database.  The database is identified by the

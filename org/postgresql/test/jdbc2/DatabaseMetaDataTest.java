@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2004-2008, PostgreSQL Global Development Group
+* Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc2/DatabaseMetaDataTest.java,v 1.44 2008/11/07 09:11:37 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc2/DatabaseMetaDataTest.java,v 1.51 2011/08/02 13:50:29 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -55,6 +55,11 @@ public class DatabaseMetaDataTest extends TestCase
             stmt.execute("CREATE OR REPLACE FUNCTION f3(IN a int, INOUT b varchar, OUT c timestamptz) AS $f$ BEGIN b := 'a'; c := now(); return; END; $f$ LANGUAGE 'plpgsql'");
         }
         stmt.execute("CREATE OR REPLACE FUNCTION f4(int) RETURNS testmetadata AS 'SELECT 1, ''a''::text, now(), ''c''::text, ''q''::text' LANGUAGE 'SQL'");
+
+        if (TestUtil.haveMinimumServerVersion(con, "7.3")) {
+            stmt.execute("CREATE DOMAIN nndom AS int not null");
+            stmt.execute("CREATE TABLE domaintable (id nndom)");
+        }
         stmt.close();
     }
 
@@ -79,6 +84,10 @@ public class DatabaseMetaDataTest extends TestCase
         }
         if (TestUtil.haveMinimumServerVersion(con, "8.1")) {
             stmt.execute("DROP FUNCTION f3(int, varchar)");
+        }
+        if (TestUtil.haveMinimumServerVersion(con, "7.3")) {
+            stmt.execute("DROP TABLE domaintable");
+            stmt.execute("DROP DOMAIN nndom");
         }
 
         TestUtil.closeDB( con );
@@ -326,6 +335,41 @@ public class DatabaseMetaDataTest extends TestCase
         rs.close();
     }
 
+    public void testDroppedColumns() throws SQLException
+    {
+        if (!TestUtil.haveMinimumServerVersion(con, "8.4"))
+            return;
+
+        Statement stmt = con.createStatement();
+        stmt.execute("ALTER TABLE testmetadata DROP name");
+        stmt.execute("ALTER TABLE testmetadata DROP colour");
+        stmt.close();
+
+        DatabaseMetaData dbmd = con.getMetaData();
+        ResultSet rs = dbmd.getColumns(null, null, "testmetadata", null);
+
+        assertTrue(rs.next());
+        assertEquals("id", rs.getString("COLUMN_NAME"));
+        assertEquals(1, rs.getInt("ORDINAL_POSITION"));
+
+        assertTrue(rs.next());
+        assertEquals("updated", rs.getString("COLUMN_NAME"));
+        assertEquals(2, rs.getInt("ORDINAL_POSITION"));
+
+        assertTrue(rs.next());
+        assertEquals("quest", rs.getString("COLUMN_NAME"));
+        assertEquals(3, rs.getInt("ORDINAL_POSITION"));
+
+        rs.close();
+
+        rs = dbmd.getColumns(null, null, "testmetadata", "quest");
+        assertTrue(rs.next());
+        assertEquals("quest", rs.getString("COLUMN_NAME"));
+        assertEquals(3, rs.getInt("ORDINAL_POSITION"));
+        assertTrue(!rs.next());
+        rs.close();
+    }
+
     public void testSerialColumns() throws SQLException
     {
         DatabaseMetaData dbmd = con.getMetaData();
@@ -377,6 +421,16 @@ public class DatabaseMetaDataTest extends TestCase
         rs.close();
         //Test that the table owner has select priv
         assertTrue("Couldn't find SELECT priv on table testmetadata for " + TestUtil.getUser(), l_foundSelect);
+    }
+
+    public void testNoTablePrivileges() throws SQLException
+    {
+        Statement stmt = con.createStatement();
+        stmt.execute("REVOKE ALL ON testmetadata FROM PUBLIC");
+        stmt.execute("REVOKE ALL ON testmetadata FROM " + TestUtil.getUser());
+        DatabaseMetaData dbmd = con.getMetaData();
+        ResultSet rs = dbmd.getTablePrivileges(null, null, "testmetadata");
+        assertTrue(!rs.next());
     }
 
     public void testPrimaryKeys() throws SQLException
@@ -443,6 +497,61 @@ public class DatabaseMetaDataTest extends TestCase
         assertTrue(rs.getBoolean("NON_UNIQUE"));
 
         assertTrue(!rs.next());
+
+        rs.close();
+    }
+
+    public void testNotNullDomainColumn() throws SQLException
+    {
+        if (!TestUtil.haveMinimumServerVersion(con, "7.3"))
+            return;
+
+        DatabaseMetaData dbmd = con.getMetaData();
+        ResultSet rs = dbmd.getColumns("", "", "domaintable", "");
+        assertTrue(rs.next());
+        assertEquals("id", rs.getString("COLUMN_NAME"));
+        assertEquals("NO", rs.getString("IS_NULLABLE"));
+        assertTrue(!rs.next());
+    }
+
+    public void testAscDescIndexInfo() throws SQLException
+    {
+        if (!TestUtil.haveMinimumServerVersion(con, "8.3"))
+            return;
+
+        Statement stmt = con.createStatement();
+        stmt.execute("CREATE INDEX idx_a_d ON testmetadata (id ASC, quest DESC)");
+        stmt.close();
+
+        DatabaseMetaData dbmd = con.getMetaData();
+        ResultSet rs = dbmd.getIndexInfo(null, null, "testmetadata", false, false);
+
+        assertTrue(rs.next());
+        assertEquals("idx_a_d", rs.getString("INDEX_NAME"));
+        assertEquals("id", rs.getString("COLUMN_NAME"));
+        assertEquals("A", rs.getString("ASC_OR_DESC"));
+
+        assertTrue(rs.next());
+        assertEquals("idx_a_d", rs.getString("INDEX_NAME"));
+        assertEquals("quest", rs.getString("COLUMN_NAME"));
+        assertEquals("D", rs.getString("ASC_OR_DESC"));
+    }
+
+    public void testPartialIndexInfo() throws SQLException
+    {
+        Statement stmt = con.createStatement();
+        stmt.execute("create index idx_p_name_id on testmetadata (name) where id > 5");
+        stmt.close();
+
+        DatabaseMetaData dbmd = con.getMetaData();
+        ResultSet rs = dbmd.getIndexInfo(null, null, "testmetadata", false, false);
+
+        assertTrue(rs.next());
+        assertEquals("idx_p_name_id", rs.getString("INDEX_NAME"));
+        assertEquals(1, rs.getInt("ORDINAL_POSITION"));
+        assertEquals("name", rs.getString("COLUMN_NAME"));
+        assertEquals("(id > 5)", rs.getString("FILTER_CONDITION"));
+        assertTrue(rs.getBoolean("NON_UNIQUE"));
 
         rs.close();
     }
@@ -605,9 +714,6 @@ public class DatabaseMetaDataTest extends TestCase
 
     public void testSchemas() throws Exception
     {
-        if (!TestUtil.haveMinimumServerVersion(con, "7.3"))
-            return ;
-
         DatabaseMetaData dbmd = con.getMetaData();
         assertNotNull(dbmd);
 

@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2004-2008, PostgreSQL Global Development Group
+* Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/jdbc4/AbstractJdbc4Connection.java,v 1.7 2008/10/08 18:24:05 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/jdbc4/AbstractJdbc4Connection.java,v 1.12 2011/08/02 13:49:23 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -14,8 +14,10 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 import org.postgresql.core.Oid;
+import org.postgresql.core.Utils;
 import org.postgresql.core.TypeInfo;
 import org.postgresql.util.GT;
 import org.postgresql.util.PSQLState;
@@ -24,7 +26,7 @@ import org.postgresql.jdbc2.AbstractJdbc2Array;
 
 abstract class AbstractJdbc4Connection extends org.postgresql.jdbc3g.AbstractJdbc3gConnection
 {
-    Properties _clientInfo;
+    private final Properties _clientInfo;
 
     public AbstractJdbc4Connection(String host, int port, String user, String database, Properties info, String url) throws SQLException {
         super(host, port, user, database, info, url);
@@ -33,35 +35,50 @@ abstract class AbstractJdbc4Connection extends org.postgresql.jdbc3g.AbstractJdb
         if (haveMinimumServerVersion("8.3")) {
             types.addCoreType("xml", Oid.XML, java.sql.Types.SQLXML, "java.sql.SQLXML", Oid.XML_ARRAY);
         }
+
+        _clientInfo = new Properties();
+        if (haveMinimumServerVersion("9.0")) {
+            String appName = info.getProperty("ApplicationName");
+            if (appName == null) {
+                appName = "";
+            }
+            _clientInfo.put("ApplicationName", appName);
+        }
     }
 
     public Clob createClob() throws SQLException
     {
+        checkClosed();
         throw org.postgresql.Driver.notImplemented(this.getClass(), "createClob()");
     }
 
     public Blob createBlob() throws SQLException
     {
+        checkClosed();
         throw org.postgresql.Driver.notImplemented(this.getClass(), "createBlob()");
     }
 
     public NClob createNClob() throws SQLException
     {
+        checkClosed();
         throw org.postgresql.Driver.notImplemented(this.getClass(), "createNClob()");
     }
 
     public SQLXML createSQLXML() throws SQLException
     {
+        checkClosed();
         return new Jdbc4SQLXML(this);
     }
 
     public Struct createStruct(String typeName, Object[] attributes) throws SQLException
     {
+        checkClosed();
         throw org.postgresql.Driver.notImplemented(this.getClass(), "createStruct(String, Object[])");
     }
 
     public Array createArrayOf(String typeName, Object[] elements) throws SQLException
     {
+        checkClosed();
         int oid = getTypeInfo().getPGArrayType(typeName);
         if (oid == Oid.UNSPECIFIED)
             throw new PSQLException(GT.tr("Unable to find server array type for provided name {0}.", typeName), PSQLState.INVALID_NAME);
@@ -99,14 +116,34 @@ abstract class AbstractJdbc4Connection extends org.postgresql.jdbc3g.AbstractJdb
 
     public boolean isValid(int timeout) throws SQLException
     {
+        checkClosed();
         throw org.postgresql.Driver.notImplemented(this.getClass(), "isValid(int)");
     }
 
     public void setClientInfo(String name, String value) throws SQLClientInfoException
     {
+        if (haveMinimumServerVersion("9.0") && "ApplicationName".equals(name)) {
+            if (value == null)
+                value = "";
+
+            try {
+                StringBuffer sql = new StringBuffer("SET application_name = '");
+                Utils.appendEscapedLiteral(sql, value, getStandardConformingStrings());
+                sql.append("'");
+                execSQLUpdate(sql.toString());
+            } catch (SQLException sqle) {
+                Map<String, ClientInfoStatus> failures = new HashMap<String, ClientInfoStatus>();
+                failures.put(name, ClientInfoStatus.REASON_UNKNOWN);
+                throw new SQLClientInfoException(GT.tr("Failed to set ClientInfo property: {0}", "ApplicationName"), sqle.getSQLState(), failures, sqle);
+            }
+
+            _clientInfo.put(name, value);
+            return;
+        }
+
         Map<String, ClientInfoStatus> failures = new HashMap<String, ClientInfoStatus>();
         failures.put(name, ClientInfoStatus.REASON_UNKNOWN_PROPERTY);
-        throw new SQLClientInfoException(GT.tr("ClientInfo property not supported."), failures);
+        throw new SQLClientInfoException(GT.tr("ClientInfo property not supported."), PSQLState.NOT_IMPLEMENTED.getState(), failures);
     }
 
     public void setClientInfo(Properties properties) throws SQLClientInfoException
@@ -118,38 +155,75 @@ abstract class AbstractJdbc4Connection extends org.postgresql.jdbc3g.AbstractJdb
 
         Iterator<String> i = properties.stringPropertyNames().iterator();
         while (i.hasNext()) {
-            failures.put(i.next(), ClientInfoStatus.REASON_UNKNOWN_PROPERTY);
+            String name = i.next();
+            if (haveMinimumServerVersion("9.0") && "ApplicationName".equals(name)) {
+                String value = properties.getProperty(name);
+                setClientInfo(name, value);
+            } else {
+                failures.put(i.next(), ClientInfoStatus.REASON_UNKNOWN_PROPERTY);
+            }
         }
-        throw new SQLClientInfoException(GT.tr("ClientInfo property not supported."), failures);
+
+        if (!failures.isEmpty())
+            throw new SQLClientInfoException(GT.tr("ClientInfo property not supported."), PSQLState.NOT_IMPLEMENTED.getState(), failures);
     }
 
     public String getClientInfo(String name) throws SQLException
     {
-        return null;
+        checkClosed();
+        return _clientInfo.getProperty(name);
     }
 
     public Properties getClientInfo() throws SQLException
     {
-        if (_clientInfo == null) {
-            _clientInfo = new Properties();
-        }
+        checkClosed();
         return _clientInfo;
     }
 
     public <T> T createQueryObject(Class<T> ifc) throws SQLException
     {
+        checkClosed();
         throw org.postgresql.Driver.notImplemented(this.getClass(), "createQueryObject(Class<T>)");
     }
 
     public boolean isWrapperFor(Class<?> iface) throws SQLException
     {
+        checkClosed();
         throw org.postgresql.Driver.notImplemented(this.getClass(), "isWrapperFor(Class<?>)");
     }
 
     public <T> T unwrap(Class<T> iface) throws SQLException
     {
+        checkClosed();
         throw org.postgresql.Driver.notImplemented(this.getClass(), "unwrap(Class<T>)");
     }
 
+    public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException
+    {
+        throw org.postgresql.Driver.notImplemented(this.getClass(), "getParentLogger()");
+    }
+
+    public void setSchema(String schema) throws SQLException
+    {
+        throw org.postgresql.Driver.notImplemented(this.getClass(), "setSchema(String)");
+    }
+
+    public String getSchema() throws SQLException
+    {
+        throw org.postgresql.Driver.notImplemented(this.getClass(), "getSchema()");
+    }
+
+    public void abort(Executor executor) throws SQLException
+    {
+        throw org.postgresql.Driver.notImplemented(this.getClass(), "abort(Executor)");
+    }
+
+    public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+        throw org.postgresql.Driver.notImplemented(this.getClass(), "setNetworkTimeout(Executor, int)");
+    }
+
+    public int getNetworkTimeout() throws SQLException {
+        throw org.postgresql.Driver.notImplemented(this.getClass(), "getNetworkTimeout()");
+    }
 
 }

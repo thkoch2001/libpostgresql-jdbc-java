@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2003-2008, PostgreSQL Global Development Group
+* Copyright (c) 2003-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/jdbc2/AbstractJdbc2ResultSet.java,v 1.107 2009/04/19 16:11:48 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/jdbc2/AbstractJdbc2ResultSet.java,v 1.112 2011/08/02 13:48:35 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -32,6 +32,7 @@ import org.postgresql.util.PGtokenizer;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.PSQLState;
 import org.postgresql.util.GT;
+import org.postgresql.PGResultSetMetaData;
 
 
 public abstract class AbstractJdbc2ResultSet implements BaseResultSet, org.postgresql.PGRefCursorResultSet
@@ -1161,18 +1162,13 @@ public abstract class AbstractJdbc2ResultSet implements BaseResultSet, org.postg
 
         StringBuffer selectSQL = new StringBuffer( "select ");
 
-        final int numColumns = java.lang.reflect.Array.getLength(fields);
-
-        for (int i = 0; i < numColumns; i++ )
-        {
-            selectSQL.append( fields[i].getColumnName(connection) );
-
-            if ( i < numColumns - 1 )
-            {
-
+        ResultSetMetaData rsmd = getMetaData();
+        PGResultSetMetaData pgmd = (PGResultSetMetaData)rsmd;
+        for (int i=1; i <= rsmd.getColumnCount(); i++) {
+            if (i > 1) {
                 selectSQL.append(", ");
             }
-
+            selectSQL.append( pgmd.getBaseColumnName(i) );
         }
         selectSQL.append(" from " ).append(onlyTable).append(tableName).append(" where ");
 
@@ -1670,23 +1666,6 @@ public abstract class AbstractJdbc2ResultSet implements BaseResultSet, org.postg
                 switch ( getSQLType(columnIndex + 1) )
                 {
 
-                case Types.DECIMAL:
-                case Types.BIGINT:
-                case Types.DOUBLE:
-                case Types.BIT:
-                case Types.VARCHAR:
-                case Types.SMALLINT:
-                case Types.FLOAT:
-                case Types.INTEGER:
-                case Types.CHAR:
-                case Types.NUMERIC:
-                case Types.REAL:
-                case Types.TINYINT:
-                case Types.ARRAY:
-                case Types.OTHER:
-                    rowBuffer[columnIndex] = connection.encodeString(String.valueOf( valueObject));
-                    break;
-
                 //
                 // toString() isn't enough for date and time types; we must format it correctly
                 // or we won't be able to re-parse it.
@@ -1726,7 +1705,8 @@ public abstract class AbstractJdbc2ResultSet implements BaseResultSet, org.postg
                     break;
  
                 default:
-                    rowBuffer[columnIndex] = (byte[]) valueObject;
+                    rowBuffer[columnIndex] = connection.encodeString(String.valueOf( valueObject));
+                    break;
                 }
 
             }
@@ -2671,7 +2651,7 @@ public abstract class AbstractJdbc2ResultSet implements BaseResultSet, org.postg
 
     protected void checkClosed() throws SQLException {
         if (rows == null)
-            throw new PSQLException(GT.tr("This ResultSet is closed."), PSQLState.CONNECTION_DOES_NOT_EXIST);
+            throw new PSQLException(GT.tr("This ResultSet is closed."), PSQLState.OBJECT_NOT_IN_STATE);
     }
 
     protected void checkColumnIndex(int column) throws SQLException
@@ -2937,10 +2917,12 @@ public abstract class AbstractJdbc2ResultSet implements BaseResultSet, org.postg
         checkColumnIndex(columnIndex);
 
         doingUpdates = !onInsertRow;
-        if (value == null)
+        if (value == null) {
             updateNull(columnIndex);
-        else
-            updateValues.put(fields[columnIndex - 1].getColumnName(connection), value);
+        } else {
+            PGResultSetMetaData md = (PGResultSetMetaData)getMetaData();
+            updateValues.put(md.getBaseColumnName(columnIndex), value);
+        }
     }
 
     /**
@@ -2983,5 +2965,14 @@ public abstract class AbstractJdbc2ResultSet implements BaseResultSet, org.postg
             return null;
         }
     };
+
+    /**
+     * Used to add rows to an already existing ResultSet that exactly
+     * match the existing rows.  Currently only used for assembling
+     * generated keys from batch statement execution.
+     */
+    void addRows(Vector tuples) {
+        rows.addAll(tuples);
+    }
 }
 

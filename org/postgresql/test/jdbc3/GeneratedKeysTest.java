@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2008, PostgreSQL Global Development Group
+* Copyright (c) 2008-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc3/GeneratedKeysTest.java,v 1.2 2009/01/28 09:50:21 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc3/GeneratedKeysTest.java,v 1.6 2011/08/02 14:41:30 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -200,6 +200,31 @@ public class GeneratedKeysTest extends TestCase {
         assertTrue(rs.next());
         assertEquals(4, rs.getInt(1));
         assertEquals("b", rs.getString(2));
+        assertTrue(!rs.next());
+    }
+
+    public void testGeneratedKeysCleared() throws SQLException {
+        Statement stmt = _conn.createStatement();
+        stmt.executeUpdate("INSERT INTO genkeys VALUES (1, 'a', 2); ", Statement.RETURN_GENERATED_KEYS);
+        ResultSet rs = stmt.getGeneratedKeys();
+        assertTrue(rs.next());
+        stmt.executeUpdate("INSERT INTO genkeys VALUES (2, 'b', 3)");
+        rs = stmt.getGeneratedKeys();
+        assertTrue(!rs.next());
+    }
+
+    public void testBatchGeneratedKeys() throws SQLException {
+        PreparedStatement ps = _conn.prepareStatement("INSERT INTO genkeys(c) VALUES (?)", Statement.RETURN_GENERATED_KEYS);
+        ps.setInt(1,4);
+        ps.addBatch();
+        ps.setInt(1,7);
+        ps.addBatch();
+        ps.executeBatch();
+        ResultSet rs = ps.getGeneratedKeys();
+        assertTrue(rs.next());
+        assertEquals(1, rs.getInt("a"));
+        assertTrue(rs.next());
+        assertEquals(2, rs.getInt("a"));
         assertTrue(!rs.next());
     }
 

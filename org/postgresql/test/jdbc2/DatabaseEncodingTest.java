@@ -1,9 +1,9 @@
 /*-------------------------------------------------------------------------
 *
-* Copyright (c) 2004-2008, PostgreSQL Global Development Group
+* Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc2/DatabaseEncodingTest.java,v 1.8 2008/01/08 06:56:30 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc2/DatabaseEncodingTest.java,v 1.10 2011/08/02 13:50:29 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -70,17 +70,17 @@ public class DatabaseEncodingTest extends TestCase
     }
 
     public void testEncoding() throws Exception {
-        // Check that we have a UNICODE server encoding, or we must skip this test.
+        // Check that we have a UTF8 server encoding, or we must skip this test.
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("SELECT getdatabaseencoding()");
         assertTrue(rs.next());
 
         String dbEncoding = rs.getString(1);
-        if (!dbEncoding.equals("UNICODE") && !dbEncoding.equals("UTF8"))
+        if (!dbEncoding.equals("UTF8"))
         {
-            System.err.println("DatabaseEncodingTest: Skipping UNICODE database tests as test database encoding is " + dbEncoding);
+            System.err.println("DatabaseEncodingTest: Skipping UTF8 database tests as test database encoding is " + dbEncoding);
             rs.close();
-            return ; // not a UNICODE database.
+            return ; // not a UTF8 database.
         }
 
         rs.close();

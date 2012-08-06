@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
-  Copyright (c) 2004-2008, PostgreSQL Global Development Group
-  $PostgreSQL: pgjdbc/doc/pgjdbc.xml,v 1.39 2009/06/20 15:19:40 jurka Exp $
+  Copyright (c) 2004-2011, PostgreSQL Global Development Group
+  $PostgreSQL: pgjdbc/doc/pgjdbc.xml,v 1.42 2011/08/02 13:40:12 davecramer Exp $
 -->
 
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
@@ -179,7 +179,7 @@ java MyApp
     encoding and you will have problems the moment you store data in it that
     does not fit in the seven bit <acronym>ASCII</acronym> character set.
     If you do not know what your encoding will be or are otherwise unsure
-    about what you will be storing the <literal>UNICODE</literal> encoding
+    about what you will be storing the <literal>UTF8</literal> encoding
     is a reasonable default to use.
    </para>
   </sect1>
@@ -669,6 +669,17 @@ Connection conn = DriverManager.getConnection(url);
        </listitem>
       </varlistentry>
 
+      <varlistentry>
+       <term><varname>ApplicationName</varname> = <type>String</type></term>
+       <listitem>
+        <para>
+         Specifies the name of the application that is using the connection.
+         This allows a database administrator to see what applications are
+         connected to the server and what resources they are using through
+         views like pg_stat_activity.
+        </para>
+       </listitem>
+      </varlistentry>
 
      </variablelist>
     </para>
