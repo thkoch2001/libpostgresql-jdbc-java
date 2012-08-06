@@ -2,8 +2,6 @@
 *
 * Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/ds/common/BaseDataSource.java,v 1.23 2011/08/02 13:42:25 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -188,7 +186,7 @@ public abstract class BaseDataSource implements Referenceable
         return protocolVersion;
     }
 
-    public void setProtocolVersion(int protocolversion)
+    public void setProtocolVersion(int protocolVersion)
     {
         this.protocolVersion = protocolVersion;
     }

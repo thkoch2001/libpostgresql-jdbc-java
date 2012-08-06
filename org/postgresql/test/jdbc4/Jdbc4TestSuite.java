@@ -2,8 +2,6 @@
 *
 * Copyright (c) 2007-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc4/Jdbc4TestSuite.java,v 1.10 2011/08/02 13:50:29 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

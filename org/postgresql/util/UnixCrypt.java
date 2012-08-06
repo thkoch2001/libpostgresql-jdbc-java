@@ -2,8 +2,6 @@
 *
 * Copyright (c) 2003-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/util/UnixCrypt.java,v 1.11 2011/08/02 13:50:29 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

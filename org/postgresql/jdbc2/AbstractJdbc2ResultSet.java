@@ -2,8 +2,6 @@
 *
 * Copyright (c) 2003-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/jdbc2/AbstractJdbc2ResultSet.java,v 1.112 2011/08/02 13:48:35 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -82,8 +80,18 @@ public abstract class AbstractJdbc2ResultSet implements BaseResultSet, org.postg
 
     private HashMap columnNameIndexMap; // Speed up findColumn by caching lookups
 
-    public abstract ResultSetMetaData getMetaData() throws SQLException;
+    private ResultSetMetaData rsMetaData;
 
+    protected abstract ResultSetMetaData createMetaData() throws SQLException;
+
+    public ResultSetMetaData getMetaData() throws SQLException
+    {
+        checkClosed();
+        if (rsMetaData == null) {
+            rsMetaData = createMetaData();
+        }
+        return rsMetaData;
+    }
 
     public AbstractJdbc2ResultSet(Query originalQuery, BaseStatement statement, Field[] fields, Vector tuples,
                                   ResultCursor cursor, int maxRows, int maxFieldSize,

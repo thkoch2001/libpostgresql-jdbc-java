@@ -2,8 +2,6 @@
 *
 * Copyright (c) 2003-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/util/PGmoney.java,v 1.14 2011/08/02 13:50:29 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

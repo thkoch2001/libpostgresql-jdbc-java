@@ -2,8 +2,6 @@
 *
 * Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/jdbc4/Jdbc4ResultSet.java,v 1.6 2011/08/02 13:49:23 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -28,9 +26,8 @@ public class Jdbc4ResultSet extends AbstractJdbc4ResultSet implements java.sql.R
         super(originalQuery, statement, fields, tuples, cursor, maxRows, maxFieldSize, rsType, rsConcurrency, rsHoldability);
     }
 
-    public java.sql.ResultSetMetaData getMetaData() throws SQLException
+    protected java.sql.ResultSetMetaData createMetaData() throws SQLException
     {
-        checkClosed();
         return new Jdbc4ResultSetMetaData(connection, fields);
     }
 

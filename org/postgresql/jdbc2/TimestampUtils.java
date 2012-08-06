@@ -2,8 +2,6 @@
 *
 * Copyright (c) 2003-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/jdbc2/TimestampUtils.java,v 1.24 2011/08/02 13:48:35 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

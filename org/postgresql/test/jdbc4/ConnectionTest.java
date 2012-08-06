@@ -2,8 +2,6 @@
 *
 * Copyright (c) 2010-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc4/ConnectionTest.java,v 1.2 2011/08/02 20:26:00 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

@@ -2,8 +2,6 @@
 *
 * Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/jdbc3g/Jdbc3gResultSet.java,v 1.11 2011/08/02 13:50:28 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
@@ -28,9 +26,8 @@ public class Jdbc3gResultSet extends org.postgresql.jdbc3g.AbstractJdbc3gResultS
         super(originalQuery, statement, fields, tuples, cursor, maxRows, maxFieldSize, rsType, rsConcurrency, rsHoldability);
     }
 
-    public java.sql.ResultSetMetaData getMetaData() throws SQLException
+    protected java.sql.ResultSetMetaData createMetaData() throws SQLException
     {
-        checkClosed();
         return new Jdbc3gResultSetMetaData(connection, fields);
     }
 

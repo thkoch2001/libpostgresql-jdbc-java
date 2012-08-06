@@ -2,8 +2,6 @@
 *
 * Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/test/jdbc2/TimeTest.java,v 1.20 2011/08/02 13:50:29 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

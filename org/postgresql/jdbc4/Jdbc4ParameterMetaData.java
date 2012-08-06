@@ -2,8 +2,6 @@
 *
 * Copyright (c) 2005-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/jdbc4/Jdbc4ParameterMetaData.java,v 1.3 2011/08/02 13:49:23 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

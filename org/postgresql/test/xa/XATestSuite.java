@@ -2,9 +2,6 @@
 *
 * Copyright (c) 2009-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/test/xa/XATestSuite.java,v 1.6 2011/08/02 20:26:00 davecramer Exp $
-*
 *-------------------------------------------------------------------------
 */
 package org.postgresql.test.xa;

@@ -2,8 +2,6 @@
 *
 * Copyright (c) 2006-2011, PostgreSQL Global Development Group
 *
-* IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/core/Parser.java,v 1.5 2011/08/02 13:40:12 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
