@@ -3,7 +3,7 @@
 * Copyright (c) 2003-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/largeobject/BlobInputStream.java,v 1.12 2008/01/08 06:56:30 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/largeobject/BlobInputStream.java,v 1.13 2011/08/02 13:50:28 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

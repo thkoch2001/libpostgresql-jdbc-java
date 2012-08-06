@@ -3,7 +3,7 @@
 * Copyright (c) 2009-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL$
+*   $PostgreSQL: pgjdbc/org/postgresql/test/xa/XADataSourceTest.java,v 1.13 2011/08/02 20:26:00 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

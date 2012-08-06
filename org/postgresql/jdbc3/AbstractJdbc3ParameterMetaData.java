@@ -3,7 +3,7 @@
 * Copyright (c) 2005-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/jdbc3/AbstractJdbc3ParameterMetaData.java,v 1.3 2008/04/15 04:23:58 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/jdbc3/AbstractJdbc3ParameterMetaData.java,v 1.4 2011/08/02 13:49:01 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

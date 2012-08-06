@@ -3,7 +3,7 @@
 * Copyright (c) 2003-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/largeobject/LargeObjectManager.java,v 1.24 2008/01/08 06:56:30 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/largeobject/LargeObjectManager.java,v 1.25 2011/08/02 13:50:28 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

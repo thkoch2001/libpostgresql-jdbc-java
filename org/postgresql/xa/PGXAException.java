@@ -3,7 +3,7 @@
 * Copyright (c) 2009-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL$
+*   $PostgreSQL: pgjdbc/org/postgresql/xa/PGXAException.java,v 1.3 2011/08/02 20:26:01 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

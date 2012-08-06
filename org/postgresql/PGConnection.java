@@ -3,7 +3,7 @@
 * Copyright (c) 2003-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/PGConnection.java,v 1.17 2009/07/01 05:00:39 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/PGConnection.java,v 1.18 2011/08/02 13:40:12 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

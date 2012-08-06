@@ -3,7 +3,7 @@
 * Copyright (c) 2003-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/PGNotification.java,v 1.13 2010/04/06 23:41:11 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/PGNotification.java,v 1.14 2011/08/02 13:40:12 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */

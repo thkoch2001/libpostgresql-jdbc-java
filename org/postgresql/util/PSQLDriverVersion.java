@@ -3,7 +3,7 @@
 * Copyright (c) 2004-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/util/PSQLDriverVersion.java,v 1.31 2011/08/02 13:50:29 davecramer Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/util/PSQLDriverVersion.java,v 1.31.2.1 2011/09/11 01:38:06 jurka Exp $
 *
 *-------------------------------------------------------------------------
 */

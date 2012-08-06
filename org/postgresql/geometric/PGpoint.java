@@ -3,7 +3,7 @@
 * Copyright (c) 2003-2011, PostgreSQL Global Development Group
 *
 * IDENTIFICATION
-*   $PostgreSQL: pgjdbc/org/postgresql/geometric/PGpoint.java,v 1.16 2008/01/08 06:56:28 jurka Exp $
+*   $PostgreSQL: pgjdbc/org/postgresql/geometric/PGpoint.java,v 1.17 2011/08/02 13:42:25 davecramer Exp $
 *
 *-------------------------------------------------------------------------
 */
