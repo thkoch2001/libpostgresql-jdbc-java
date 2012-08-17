@@ -1,3 +1,15 @@
+libpgjava (9.1-902-1) UNRELEASED; urgency=low
+
+  [ Thomas Koch ]
+  * new upstream version
+  * switch packaging to git
+  * update debhelper and compat to 9
+  * use debian/clean
+  * use PACKAGE.links to add symlink to *-jdbc3.jar
+  * Install artifacts to /u/s/maven-repo (Closes: #683631)
+
+ -- Thomas Koch <thomas@koch.ro>  Fri, 17 Aug 2012 18:46:00 +0200
+
 libpgjava (9.1-901-2) unstable; urgency=low
 
   * Provide transitional package libpg-java (closes: #659324)
