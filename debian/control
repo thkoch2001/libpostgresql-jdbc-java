@@ -1,0 +1,52 @@
+Source: libpgjava
+Section: java
+Priority: optional
+Maintainer: Debian Java Maintainers <pkg-java-maintainers@lists.alioth.debian.org>
+Uploaders: Arnaud Vandyck <avdyk@debian.org>, Matthias Klose <doko@ubuntu.com>, 
+ Andrew Ross <ubuntu@rossfamily.co.uk>
+Build-Depends: debhelper (>= 7.0.50~), java-gcj-compat-dev, ant, javahelper (>=0.32~) 
+Build-Depends-Indep: libxerces2-java, default-jdk, default-jdk-doc
+Standards-Version: 3.9.3
+Vcs-Svn: svn://svn.debian.org/svn/pkg-java/trunk/libpgjava
+Vcs-Browser: http://svn.debian.org/wsvn/pkg-java/trunk/libpgjava
+Homepage: http://jdbc.postgresql.org/
+
+Package: libpostgresql-jdbc-java
+Architecture: all
+Depends: ${java:Depends}, ${misc:Depends}
+Recommends: ${java:Recommends}
+Suggests: postgresql (>= 8.2)
+Conflicts: libpgjava (<= 7.4.7-3), libpg-java (<= 9.1-901-1)
+Provides: libpgjava, libpg-java
+Replaces: libpgjava, libpg-java (<= 9.1-901-1)
+Description: Java database (JDBC) driver for PostgreSQL
+ Java classes for communication with the PostgreSQL 7.2 up to 9.1 database
+ backend (local or remote) using JDBC. This package contains two Java archives
+ (JARs), one that supports JDBC 3.0 and SSL (for JDK 1.4 and up) and one that 
+ supports JDBC 4.0 and SSL (for JDK 1.6 and up).
+
+Package: libpostgresql-jdbc-java-doc
+Section: doc
+Architecture: all
+Depends: ${java:Depends}, ${misc:Depends}
+Recommends: ${java:Recommends}
+Conflicts: libpg-java-doc (<= 8.4-702-1)
+Provides: libpg-java-doc
+Replaces: libpg-java-doc
+Description: Java database (JDBC) driver for PostgreSQL (documentation)
+ Java classes for communication with the PostgreSQL 7.2 up to 8.4 database
+ backend (local or remote) using JDBC. This package contains two Java archives
+ (JARs), one that supports JDBC 3.0 and SSL (for JDK 1.4 and up) and one that 
+ supports JDBC 4.0 and SSL (for JDK 1.6 and up).
+ .
+ This package contains the documentation.
+
+Package: libpg-java
+Architecture: all
+Section: oldlibs
+Priority: extra
+Depends: libpostgresql-jdbc-java, ${misc:Depends}
+Description: Transitional package for libpostgresql-jdbc-java
+ This is a transitional package for libpg-java, and can be safely removed
+ after the installation is complete.
+
